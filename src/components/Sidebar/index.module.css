@@ -1,157 +1,274 @@
+/* 布局容器 */
 .layout {
-    min-height: 100vh;
-    position: relative;
-  }
+  min-height: 100dvh;
+  position: relative;
+
+}
+
+/* 侧边栏遮罩层（移动端） */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 98;
+  animation: fadeIn 0.3s ease;
+}
+
+/* 侧边栏样式 */
+.sider {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 260px;
+  background: linear-gradient(180deg, #001529 0%, #002140 100%);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* 侧边栏隐藏状态 */
+.siderCollapsed {
+  transform: translateX(-100%);
+}
+
+/* Logo 区域 */
+.logo {
+  height: 64px;
+  margin: 16px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.logo span {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* 菜单容器 */
+.menuContainer {
+  flex: 1;
+  padding: 8px 16px;
+}
+
+/* 菜单项 */
+.menuItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 4px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.65);
+  position: relative;
+  overflow: hidden;
+}
+
+.menuItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.menuItemActive {
+  background: #1890ff;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.menuItemActive:hover {
+  background: #40a9ff;
+  color: #fff;
+}
+
+/* 菜单图标 */
+.menuIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  margin-right: 12px;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+/* 菜单文字 */
+.menuLabel {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+/* 右侧内容区域 */
+.mainLayout {
+  min-height: 100vh;
+  background: #f0f2f5;
+  transition: margin-left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  margin-left: 260px;
+}
+
+.mainLayoutExpanded {
+  margin-left: 0;
+}
+
+/* 内容区域 */
+.content {
+  margin: 24px;
+  padding: 24px;
+  min-height: calc(100vh - 48px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s;
+  animation: fadeIn 0.3s ease;
+}
+
+/* 悬浮按钮 */
+.floatingBtn {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  z-index: 1000;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  border: none;
+  color: #1890ff;
+  background-color: transparent;
+}
+
+.floatingBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.floatingBtn:active {
+  transform: scale(0.98);
+}
+
+/* 展开状态按钮样式 */
+.floatingBtnExpanded {
+  left: 280px;
+  background: #ffffff00;
+  color: #1890ff;
   
-  .sider {
-    overflow: auto;
-    height: 100vh;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    background: #001529;
-    z-index: 100;
-  }
-  
-  /* 侧边栏隐藏时的样式 */
-  .sider :global(.ant-layout-sider-children) {
-    height: 100vh;
-    overflow: auto;
-  }
-  
-  .logo {
-    height: 32px;
-    margin: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    transition: all 0.2s ease;
-  }
-  
-  .menu {
-    border-right: none;
-  }
-  
-  .mainLayout {
-    transition: margin-left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    min-height: 100vh;
-    background: #f0f2f5;
-  }
-  
-  .content {
-    margin: 24px 16px;
-    padding: 24px;
-    min-height: 280px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s;
-    animation: fadeIn 0.3s ease;
-  }
-  
-  /* 悬浮按钮基础样式 */
-  .floatingBtn {
-    position: fixed;
-    left: 20px;
-    top: 20px;
-    z-index: 1000;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    cursor: pointer;
-    font-size: 20px;
-  }
-  
-  /* 展开状态下的按钮样式（侧边栏显示时） */
-  .floatingBtnExpanded {
-    left: 220px; /* 在侧边栏右侧，200px宽度 + 20px间距 */
-    background: #fff;
-    color: #1890ff;
-    border: 1px solid #e8e8e8;
-  }
-  
-  .floatingBtnExpanded:hover {
-    background: #f5f5f5;
-    transform: scale(1.05);
-    left: 218px; /* 微调位置，增强交互感 */
-  }
-  
-  /* 折叠状态下的按钮样式（侧边栏隐藏时） */
-  .floatingBtnCollapsed {
-    left: 20px;
-    background: #1890ff;
-    color: #fff;
-    border: none;
-  }
-  
-  .floatingBtnCollapsed:hover {
-    background: #40a9ff;
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-  }
-  
-  /* 动画效果 */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* 响应式设计 */
-  @media (max-width: 768px) {
-    .content {
-      margin: 16px 12px;
-      padding: 16px;
-    }
-    
-    .floatingBtn {
-      width: 40px;
-      height: 40px;
-      font-size: 18px;
-    }
-    
-    /* 移动端展开状态 */
-    .floatingBtnExpanded {
-      left: 16px; /* 移动端侧边栏宽度可能需要调整 */
-    }
-    
-    /* 移动端折叠状态 */
-    .floatingBtnCollapsed {
-      left: 16px;
-      top: 16px;
-    }
-  }
-  
-  /* 可选：添加按钮悬停提示 */
-  .floatingBtn::before {
-    content: attr(data-tip);
-    position: absolute;
-    left: 60px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.75);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
+}
+
+.floatingBtnExpanded:hover {
+  left: 278px;
+  background: #f5f5f5;
+}
+
+/* 折叠状态按钮样式 */
+.floatingBtnCollapsed {
+  left: 0px;
+  color: #fff;
+  border: none;
+}
+
+.floatingBtnCollapsed:hover {
+  background: #40a9ff;
+  /* box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3); */
+}
+
+/* 自定义滚动条 */
+.sider::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sider::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sider::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.sider::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from {
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 1001;
+    transform: translateY(10px);
   }
-  
-  .floatingBtn:hover::before {
+  to {
     opacity: 1;
+    transform: translateY(0);
   }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .sider {
+    width: 280px;
+  }
+
+  .mainLayout {
+    margin-left: 0;
+  }
+
+  .content {
+    margin: 16px;
+    padding: 16px;
+  }
+
+  .floatingBtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .floatingBtnExpanded {
+    left: 20px;
+  }
+
+  .floatingBtnExpanded:hover {
+    left: 20px;
+  }
+
+  .menuLabel {
+    font-size: 15px;
+  }
+
+  .menuItem {
+    padding: 14px 16px;
+  }
+}
+
+/* 移动端横屏优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .sider {
+    width: 240px;
+  }
+
+  .menuItem {
+    padding: 8px 16px;
+  }
+
+  .logo {
+    height: 48px;
+    margin: 12px 20px;
+  }
+}

@@ -1,0 +1,352 @@
+/* LogIn.module.css */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.loginCard {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  max-width: 1100px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.charactersContainer {
+  position: relative;
+  width: 550px;
+  height: 800px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Purple Character */
+.purpleCharacter {
+  position: absolute;
+  bottom: 0;
+  left: 70px;
+  width: 180px;
+  background-color: #6C3FF5;
+  border-radius: 10px 10px 0 0;
+  z-index: 1;
+  transform-origin: bottom center;
+  transition: all 0.7s ease-in-out;
+}
+
+.purpleEyes {
+  position: absolute;
+  display: flex;
+  gap: 32px;
+  transition: all 0.7s ease-in-out;
+}
+
+/* Black Character */
+.blackCharacter {
+  position: absolute;
+  bottom: 0;
+  left: 240px;
+  width: 120px;
+  height: 310px;
+  background-color: #2D2D2D;
+  border-radius: 8px 8px 0 0;
+  z-index: 2;
+  transform-origin: bottom center;
+  transition: all 0.7s ease-in-out;
+}
+
+.blackEyes {
+  position: absolute;
+  display: flex;
+  gap: 24px;
+  transition: all 0.7s ease-in-out;
+}
+
+/* Orange Character */
+.orangeCharacter {
+  position: absolute;
+  bottom: 0;
+  left: 0px;
+  width: 240px;
+  height: 200px;
+  z-index: 3;
+  background-color: #FF9B6B;
+  border-radius: 120px 120px 0 0;
+  transform-origin: bottom center;
+  transition: all 0.7s ease-in-out;
+}
+
+.orangeEyes {
+  position: absolute;
+  display: flex;
+  gap: 32px;
+  transition: all 0.2s ease-out;
+}
+
+.orangeMouth {
+  position: absolute;
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mouthContainer {
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+
+.mouthShape {
+  width: 16px;
+  height: 16px;
+  border: 10px solid #2D2D2D;
+  background: transparent;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-sizing: border-box;
+}
+
+/* Mouth States */
+.orangeCharacter[data-mouth="circle"] .mouthShape {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transform: translateY(0);
+}
+
+.orangeCharacter[data-mouth="foldUp"] .mouthShape {
+  width: 18px;
+  height: 10px;
+  border-radius: 0 0 20px 20px;
+  border-top: none;
+  transform: translateY(-2px);
+}
+
+.orangeCharacter[data-mouth="foldDown"] .mouthShape {
+  width: 18px;
+  height: 10px;
+  border-radius: 20px 20px 0 0;
+  border-bottom: none;
+  transform: translateY(2px);
+}
+
+@media (max-width: 768px) {
+  .mouthContainer {
+    transform: scale(0.8);
+  }
+}
+
+/* Yellow Character */
+.yellowCharacter {
+  position: absolute;
+  bottom: 0;
+  left: 310px;
+  width: 140px;
+  height: 230px;
+  background-color: #E8D754;
+  border-radius: 70px 70px 0 0;
+  z-index: 4;
+  transform-origin: bottom center;
+  transition: all 0.7s ease-in-out;
+}
+
+.yellowEyes {
+  position: absolute;
+  display: flex;
+  gap: 24px;
+  transition: all 0.2s ease-out;
+}
+
+.yellowMouth {
+  position: absolute;
+  width: 80px;
+  height: 4px;
+  background-color: #2D2D2D;
+  border-radius: 9999px;
+  transition: all 0.2s ease-out;
+}
+
+/* Eye components */
+.eyeBall {
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease-out;
+  overflow: hidden;
+}
+
+.pupil {
+  border-radius: 9999px;
+  transition: transform 0.1s ease-out;
+}
+
+/* Form Styles */
+.form {
+  flex: 1;
+  padding: 48px 40px;
+  min-width: 320px;
+  padding-top: 400px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.inputGroup {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #6C3FF5;
+  box-shadow: 0 0 0 3px rgba(108, 63, 245, 0.1);
+}
+
+.passwordWrapper {
+  position: relative;
+}
+
+.passwordInput {
+  padding-right: 70px;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6C3FF5;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.togglePassword:hover {
+  background-color: rgba(108, 63, 245, 0.1);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 16px;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+/* Success Container */
+.successContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.successMessage {
+  background: white;
+  padding: 48px;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.successMessage h2 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.successMessage p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.logoutButton {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loginCard {
+    flex-direction: column;
+  }
+  
+  .charactersContainer {
+    width: 100%;
+    height: 300px;
+    transform: scale(0.8);
+  }
+  
+  .form {
+    padding: 32px 24px;
+  }
+  
+  .title {
+    font-size: 28px;
+  }
+}
