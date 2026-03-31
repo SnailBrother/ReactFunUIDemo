@@ -32,6 +32,12 @@ export const menuItems = [
     label: '登录',
     component: lazy(() => import('./pages/LogIn')),
   },
+    {
+    key: '/waterwave',
+    icon: <SettingOutlined />,
+    label: '水波动画',
+    component: lazy(() => import('./pages/WaterWave')),
+  },
 ];
 
 // 生成路由配置（包含根路径）
