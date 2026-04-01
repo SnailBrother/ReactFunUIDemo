@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>双层波浪效果 - 不重叠的灵动波浪</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #d4eef7 0%, #9fc9d6 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif;
+        }
+
+        /* 波浪容器样式 - 模拟卡片式效果，便于观察双层波浪 */
+        .demo-container {
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 48px;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+            background: #f0f9ff;
+            transition: all 0.3s ease;
+        }
+
+        /* 信息面板，展示参数调节 */
+        .info-panel {
+            padding: 20px 28px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(72, 187, 200, 0.3);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 120px;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #1e606e;
+            text-transform: uppercase;
+        }
+
+        .control-group span {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #0b4b57;
+            margin-left: 8px;
+        }
+
+        input {
+            background: white;
+            border: 1px solid #bcdde3;
+            border-radius: 40px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #155f6b;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #2c9ab0;
+            box-shadow: 0 0 0 2px rgba(44, 154, 176, 0.2);
+        }
+
+        .badge {
+            background: #1f7e8c;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 700px) {
+            .info-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="demo-container">
+    <!-- 双层波浪Canvas容器 -->
+    <div style="position: relative; background: #cbeff4; min-height: 280px;">
+        <canvas id="doubleWaveCanvas" style="display: block; width: 100%; height: auto; background: #cbeff4;"></canvas>
+    </div>
+    <div class="info-panel">
+        <div class="control-group">
+            <label>🌊 波浪1 振幅 / 频率 / 垂直偏移</label>
+            <input type="range" id="amp1" min="5" max="40" step="1" value="22">
+            <div style="display: flex; gap: 12px;">
+                <input type="range" id="freq1" min="0.003" max="0.018" step="0.0005" value="0.009">
+                <input type="range" id="offset1" min="0.3" max="0.8" step="0.01" value="0.55">
+            </div>
+        </div>
+        <div class="control-group">
+            <label>💧 波浪2 振幅 / 频率 / 垂直偏移</label>
+            <input type="range" id="amp2" min="5" max="45" step="1" value="18">
+            <div style="display: flex; gap: 12px;">
+                <input type="range" id="freq2" min="0.005" max="0.022" step="0.0005" value="0.012">
+                <input type="range" id="offset2" min="0.3" max="0.9" step="0.01" value="0.72">
+            </div>
+        </div>
+        <div class="badge">✨ 双层独立波浪 · 无重叠交错</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 获取canvas元素 ----------
+        const canvas = document.getElementById('doubleWaveCanvas');
+        if (!canvas) return;
+
+        // ---------- DOM 元素绑定 (控制面板) ----------
+        // 波浪1参数控件
+        const amp1Slider = document.getElementById('amp1');
+        const freq1Slider = document.getElementById('freq1');
+        const offset1Slider = document.getElementById('offset1');
+        // 波浪2参数控件
+        const amp2Slider = document.getElementById('amp2');
+        const freq2Slider = document.getElementById('freq2');
+        const offset2Slider = document.getElementById('offset2');
+
+        // ---------- 波浪参数初始值 (与控件默认值一致) ----------
+        // 第一层波浪配置 (上层/中层)
+        let wave1Params = {
+            amplitude: 22,          // 振幅(px)
+            frequency: 0.009,      // 密度/频率
+            verticalOffset: 0.55,   // 垂直基准位置 (画布高度的比例)
+            speed: 0.009,          // 横向移动速度
+            floatAmplitude: 6,      // 整体上下浮动幅度 (为了增加生动性，但不会让两层重叠)
+            floatSpeed: 0.008       // 整体浮动速度
+        };
+
+        // 第二层波浪配置 (下层或独立层，确保垂直偏移与第一层有明显间隔)
+        let wave2Params = {
+            amplitude: 18,
+            frequency: 0.012,
+            verticalOffset: 0.72,
+            speed: 0.007,          // 不同速度增加层次感
+            floatAmplitude: 4,      // 单独浮动幅度 (独立相位)
+            floatSpeed: 0.006
+        };
+
+        // 独立浮动相位 (分别控制每层波浪的上下整体摆动, 避免绑定在一起)
+        let floatPhase1 = 0;
+        let floatPhase2 = 0;
+        // 横向移动相位
+        let phase1 = 0;
+        let phase2 = 0;
+
+        // 动画帧ID
+        let animationId = null;
+        // 用于监听视口/尺寸变化的ResizeObserver
+        let resizeObserver = null;
+
+        // ---------- 工具函数: 获取canvas实际像素尺寸 (响应容器宽高, 支持动态视口) ----------
+        // 本组件设计为宽度占满父容器(100%宽度)，高度固定为动态计算值(例如280~400自适应)
+        // 为了更好的演示, 让canvas实际像素尺寸与CSS显示尺寸匹配(1:1映射), 同时高度根据需求设定。
+        // 需求: 原组件支持 width="100dvw" 动态视口，但实际双层不重叠重点在于垂直偏移合理。
+        // 为了方便演示，我们让canvas宽度为父容器宽度(响应式)，高度设置为360px(便于观察两层不重叠)。
+        // 同时保留类似原组件的动态计算能力，并且适应窗口resize。
+        function updateCanvasSize() {
+            // 获取父容器实际渲染宽度 (canvas所在的父div)
+            const container = canvas.parentElement;
+            if (!container) return;
+            const containerWidth = container.clientWidth;
+            // 设置一个固定高度(或者根据需求动态)，为了两层明显不重叠，高度足够展示偏移量差值。
+            // 原组件高度通常为100px，但双层需要展示更多空间，使用320~380比较合适，视觉舒适。
+            let desiredHeight = 360;
+            // 可选: 如果屏幕过小稍微降低高度
+            if (containerWidth < 500) desiredHeight = 280;
+            canvas.width = containerWidth;
+            canvas.height = desiredHeight;
+            return { width: canvas.width, height: canvas.height };
+        }
+
+        // ---------- 核心绘图函数: 绘制双层波浪 (保证两层路径不重叠且独立运动) ----------
+        function drawWaves() {
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            if (w === 0 || h === 0) return;
+
+            // 1. 清空画布 (透明背景, 但需要绘制底部底色统一)
+            ctx.clearRect(0, 0, w, h);
+            
+            // 绘制整体背景渐变 (从浅水区到深水区渐变，增强层次)
+            const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
+            bgGradient.addColorStop(0, '#b3e2e8');
+            bgGradient.addColorStop(0.55, '#68bbc9');
+            bgGradient.addColorStop(1, '#2c7f8c');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, w, h);
+            
+            // ------------------- 绘制第二层波浪 (下层，先绘制底层再绘制上层，让上层部分遮盖但保留独立感) -------------------
+            // 为了确保两层“不重叠”，其实是指视觉上波形交叉但彼此独立且各自占据不同基准高度，
+            // 原本担心重叠过度，通过调整垂直偏移+振幅范围可保证两层主体区域分离，并且在动态浮动中依然保持各自的垂直带。
+            // 先绘制第二层（位置相对较低），再绘制第一层（位置偏高），形成前后遮挡但又分离的美感。
+            // 注意: 这里的“不重叠”并非数学上永不相交，而是视觉上属于不同水层，相得益彰。
+            
+            // 2. 绘制下层波浪 (wave2, 更靠近底部)
+            drawSingleWave(ctx, w, h, wave2Params, phase2, floatPhase2, '#3F9CAD', '#1B6F7E', 0.7);
+            
+            // 3. 绘制上层波浪 (wave1, 中上部，明亮颜色)
+            drawSingleWave(ctx, w, h, wave1Params, phase1, floatPhase1, '#C2EEF0', '#359AAE', 0.85);
+            
+            // 添加微光点缀 (水光高亮)
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            for(let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(40 + i * 120 + (Date.now() * 0.002) % 300, 30 + Math.sin(Date.now() * 0.003 + i) * 8, 3, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 248, 205, ${0.2 + Math.sin(Date.now() * 0.005 + i) * 0.1})`;
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+        
+        /**
+         * 绘制单层波浪路径并填充渐变
+         * @param {CanvasRenderingContext2D} ctx 
+         * @param {number} w 画布宽度
+         * @param {number} h 画布高度
+         * @param {Object} params 波浪参数 { amplitude, frequency, verticalOffset, speed (相位已外置), floatAmplitude, floatSpeed }
+         * @param {number} phase 横向移动相位
+         * @param {number} floatPhase 上下浮动相位
+         * @param {string} topColor 渐变顶部颜色
+         * @param {string} bottomColor 渐变底部颜色
+         * @param {number} opacity 透明度影响（可选）
+         */
+        function drawSingleWave(ctx, w, h, params, phase, floatPhase, topColor, bottomColor, opacity = 1) {
+            const { amplitude, frequency, verticalOffset, floatAmplitude, floatSpeed } = params;
+            // 计算当前帧的上下浮动偏移 (整体浮动偏移量)
+            const floatOffset = Math.sin(floatPhase) * floatAmplitude;
+            // 基础垂直位置 (画布高度比例)
+            const baseY = h * verticalOffset;
+            
+            ctx.beginPath();
+            // 从最左侧底部连接点开始（为了让填充完整，路径从 (0, h) 开始）
+            ctx.moveTo(0, h);
+            
+            // 逐像素绘制波浪曲线 (为了提高性能可步长2，但视觉细腻)
+            for (let x = 0; x <= w; x += 1.5) {
+                // 正弦波核心: sin(频率 * x + 横向相位)
+                const sinValue = Math.sin(x * frequency + phase);
+                // 波浪偏移
+                const waveYoffset = sinValue * amplitude;
+                // 当前点实际Y坐标
+                const y = baseY + waveYoffset + floatOffset;
+                // 边界裁剪: 确保y坐标不超出画布范围太多 (避免溢出尖角)
+                const clampedY = Math.min(h - 2, Math.max(2, y));
+                ctx.lineTo(x, clampedY);
+            }
+            
+            // 连接到右下角
+            ctx.lineTo(w, h);
+            ctx.closePath();
+            
+            // 创建线性渐变填充 (根据波浪顶部到底部，但为了让波浪有立体感，渐变方向垂直)
+            const gradient = ctx.createLinearGradient(0, Math.max(0, baseY - amplitude - floatAmplitude), 0, h);
+            gradient.addColorStop(0, topColor);
+            gradient.addColorStop(0.7, bottomColor);
+            ctx.fillStyle = gradient;
+            if (opacity < 1) {
+                ctx.globalAlpha = opacity;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            } else {
+                ctx.fill();
+            }
+            
+            // 可选: 给波浪边缘添加亮线(增强立体感)
+            ctx.save();
+            ctx.beginPath();
+            // 重新描边上轮廓 (只显示波浪顶部高光线)
+            for (let x = 0; x <= w; x += 2) {
+                const sinValue = Math.sin(x * frequency + phase);
+                const waveYoffset = sinValue * amplitude;
+                const y = baseY + waveYoffset + floatOffset;
+                const clampedY = Math.min(h - 2, Math.max(2, y));
+                if (x === 0) ctx.moveTo(x, clampedY);
+                else ctx.lineTo(x, clampedY);
+            }
+            ctx.strokeStyle = 'rgba(255, 255, 245, 0.4)';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.restore();
+        }
+        
+        // ---------- 更新相位与动画循环 ----------
+        function updatePhases() {
+            // 横向移动相位增加（速度由各自参数独立控制）
+            phase1 += wave1Params.speed;
+            phase2 += wave2Params.speed;
+            // 上下浮动相位独立增加
+            floatPhase1 += wave1Params.floatSpeed;
+            floatPhase2 += wave2Params.floatSpeed;
+            
+            // 避免过大，无实际影响但保持数值范围
+            if (phase1 > Math.PI * 2) phase1 -= Math.PI * 2;
+            if (phase2 > Math.PI * 2) phase2 -= Math.PI * 2;
+            if (floatPhase1 > Math.PI * 2) floatPhase1 -= Math.PI * 2;
+            if (floatPhase2 > Math.PI * 2) floatPhase2 -= Math.PI * 2;
+        }
+        
+        // 动画主循环: 更新尺寸、更新相位、绘制
+        let lastTimestamp = 0;
+        function animate() {
+            // 每次重绘前先确保canvas尺寸跟随父容器 (响应窗口大小变化)
+            const { width: newW, height: newH } = updateCanvasSize();
+            if (newW > 0 && newH > 0) {
+                // 更新相位
+                updatePhases();
+                // 绘制双层波浪
+                drawWaves();
+            }
+            // 继续下一帧
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        // ---------- 监听参数变化 (滑块事件) 动态更新波浪参数 ----------
+        function bindParamControls() {
+            if (amp1Slider) {
+                amp1Slider.addEventListener('input', (e) => {
+                    wave1Params.amplitude = parseFloat(e.target.value);
+                });
+            }
+            if (freq1Slider) {
+                freq1Slider.addEventListener('input', (e) => {
+                    wave1Params.frequency = parseFloat(e.target.value);
+                });
+            }
+            if (offset1Slider) {
+                offset1Slider.addEventListener('input', (e) => {
+                    wave1Params.verticalOffset = parseFloat(e.target.value);
+                });
+            }
+            if (amp2Slider) {
+                amp2Slider.addEventListener('input', (e) => {
+                    wave2Params.amplitude = parseFloat(e.target.value);
+                });
+            }
+            if (freq2Slider) {
+                freq2Slider.addEventListener('input', (e) => {
+                    wave2Params.frequency = parseFloat(e.target.value);
+                });
+            }
+            if (offset2Slider) {
+                offset2Slider.addEventListener('input', (e) => {
+                    wave2Params.verticalOffset = parseFloat(e.target.value);
+                });
+            }
+            
+            // 可选额外添加速度控制? 为了丰富但界面简洁, 默认速度较优美，若需要可扩展, 但核心双层已保证独立不重叠。
+            // 为增加灵活，可微调速度: 但不加入滑块影响体验复杂度，但保留内部可调节属性。
+            // 内置速度配置: wave1 速度0.009，wave2 速度0.007 浮动速度略有差异，保证灵动且不重叠。
+        }
+        
+        // 处理窗口大小变化 (除了动画每帧更新尺寸外，还要在resize时立即更新，避免尺寸突变)
+        function handleResize() {
+            if (canvas) {
+                updateCanvasSize();
+                drawWaves();
+            }
+        }
+        
+        // 初始化监听器
+        function init() {
+            bindParamControls();
+            // 设置初始画布尺寸
+            updateCanvasSize();
+            // 启动动画
+            animate();
+            window.addEventListener('resize', handleResize);
+            // 使用 ResizeObserver 监听父容器尺寸变化 (更加稳妥)
+            if (canvas.parentElement && window.ResizeObserver) {
+                resizeObserver = new ResizeObserver(() => {
+                    updateCanvasSize();
+                    drawWaves();
+                });
+                resizeObserver.observe(canvas.parentElement);
+            }
+        }
+        
+        // 清理函数(但页面不会卸载，模拟组件风格)
+        function cleanup() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            window.removeEventListener('resize', handleResize);
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+                resizeObserver = null;
+            }
+        }
+        
+        // 页面关闭或者重新加载时无需额外处理，但支持刷新。
+        window.addEventListener('beforeunload', () => {
+            if (animationId) cancelAnimationFrame(animationId);
+        });
+        
+        init();
+        
+        // 导出清理函数以备热更新 (但原生JS环境无需)
+    })();
+</script>
+</body>
+</html>
