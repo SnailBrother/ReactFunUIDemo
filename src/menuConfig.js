@@ -25,18 +25,24 @@ export const menuItems = [
     icon: <SettingOutlined />,
     label: '系统设置',
     component: lazy(() => import('./pages/Settings')),
-  }, 
+  },
   {
     key: '/login',
     icon: <SettingOutlined />,
     label: '登录',
     component: lazy(() => import('./pages/LogIn')),
   },
-    {
+  {
     key: '/waterwave',
     icon: <SettingOutlined />,
     label: '水波动画',
     component: lazy(() => import('./pages/WaterWave')),
+  },
+  {
+    key: '/audioWaveplayer',
+    icon: <SettingOutlined />,
+    label: '音频可视化',
+    component: lazy(() => import('./pages/AudioWavePlayer')),
   },
 ];
 
