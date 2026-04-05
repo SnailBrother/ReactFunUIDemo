@@ -44,6 +44,12 @@ export const menuItems = [
     label: '音频可视化',
     component: lazy(() => import('./pages/AudioWavePlayer')),
   },
+  {
+    key: '/Reader',
+    icon: <SettingOutlined />,
+    label: '阅读',
+    component: lazy(() => import('./pages/Reader')),
+  },
 ];
 
 // 生成路由配置（包含根路径）
