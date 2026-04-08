@@ -50,6 +50,12 @@ export const menuItems = [
     label: '阅读',
     component: lazy(() => import('./pages/Reader')),
   },
+  {
+    key: '/VideoCall',
+    icon: <SettingOutlined />,
+    label: 'VideoCall',
+    component: lazy(() => import('./pages/VideoCall')),
+  }
 ];
 
 // 生成路由配置（包含根路径）
