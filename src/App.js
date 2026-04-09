@@ -5,6 +5,8 @@ import Sidebar from './components/Sidebar';
 import { routes } from './menuConfig';
 
 import './App.css';
+import process from 'process';
+window.process = process;
 
 // 单独导入首页组件用于根路径
 const Home = lazy(() => import('./pages/Home'));

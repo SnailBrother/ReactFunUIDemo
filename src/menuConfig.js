@@ -55,6 +55,12 @@ export const menuItems = [
     icon: <SettingOutlined />,
     label: 'VideoCall',
     component: lazy(() => import('./pages/VideoCall')),
+  },
+  {
+    key: '/NOServerVideoCall',
+    icon: <SettingOutlined />,
+    label: 'NOServerVideoCall',
+    component: lazy(() => import('./pages/NOServerVideoCall')),
   }
 ];
 

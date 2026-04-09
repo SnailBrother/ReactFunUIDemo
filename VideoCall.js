@@ -174,7 +174,7 @@ function findSocketByUserId(roomId, userId) {
   return null;
 }
 
-const PORT = process.env.PORT || 443;
+const PORT = process.env.PORT || 8443;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`HTTPS 服务器运行在端口 ${PORT}`);
 });

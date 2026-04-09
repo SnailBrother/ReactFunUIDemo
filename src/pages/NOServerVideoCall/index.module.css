@@ -1,0 +1,317 @@
+/* index.module.css */
+.container {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.header h2 {
+  font-size: 32px;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.debugPanel {
+  background: rgba(0,0,0,0.8);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.debugSummary {
+  cursor: pointer;
+  font-weight: bold;
+  padding: 10px 15px;
+  color: #00ff00;
+  user-select: none;
+}
+
+.debugContent {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px;
+  border-top: 1px solid #333;
+}
+
+.debugLog {
+  font-size: 12px;
+  margin: 5px 0;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+}
+
+.errorMessage {
+  background: rgba(255,0,0,0.9);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.errorClose {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
+}
+
+.joinContainer {
+  background: rgba(255,255,255,0.95);
+  border-radius: 15px;
+  padding: 40px;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.roomInput {
+  padding: 12px;
+  font-size: 16px;
+  width: 250px;
+  margin-right: 10px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  transition: border-color 0.3s;
+}
+
+.roomInput:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.joinButton {
+  padding: 12px 25px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.joinButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.joinButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.joinHint {
+  margin-top: 15px;
+  color: #666;
+  font-size: 14px;
+}
+
+.roomContainer {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.featuredVideo {
+  margin-bottom: 20px;
+}
+
+.featuredHeader {
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  color: #333;
+}
+
+.connectedStatus {
+  color: #4caf50;
+}
+
+.featuredVideoElement {
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  border: 3px solid #667eea;
+  border-radius: 10px;
+  background: #000;
+  display: block;
+  margin: 0 auto;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.controlButton {
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+
+.controlButton:hover {
+  transform: translateY(-2px);
+}
+
+.audioOn {
+  background: #2196f3;
+}
+
+.audioOff {
+  background: #f44336;
+}
+
+.videoOn {
+  background: #2196f3;
+}
+
+.videoOff {
+  background: #f44336;
+}
+
+.switchCamera {
+  background: #ff9800;
+}
+
+.selectCamera {
+  background: #9c27b0;
+}
+
+.leaveButton {
+  background: #f44336;
+}
+
+.participantsSection {
+  margin-top: 20px;
+}
+
+.participantsTitle {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+}
+
+.thumbnailGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.thumbnail {
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #f5f5f5;
+}
+
+.thumbnailActive {
+  border: 3px solid #4caf50;
+  background: #e8f5e8;
+}
+
+.thumbnailInactive {
+  border: 1px solid #ddd;
+  background: white;
+}
+
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.thumbnailLabel {
+  font-size: 12px;
+  margin-bottom: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.thumbnailVideo {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 5px;
+  background: #000;
+}
+
+.thumbnailStatus {
+  font-size: 10px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.statusConnected {
+  color: #4caf50;
+}
+
+.statusConnecting {
+  color: #ff9800;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px;
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.emptyStateEmoji {
+  font-size: 48px;
+  color: #999;
+}
+
+.emptyStateText {
+  color: #999;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .joinContainer {
+    padding: 20px;
+    margin: 20px;
+  }
+  
+  .roomInput {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .joinButton {
+    width: 100%;
+  }
+  
+  .thumbnailVideo {
+    width: 100px;
+    height: 75px;
+  }
+}

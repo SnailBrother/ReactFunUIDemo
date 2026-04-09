@@ -182,17 +182,9 @@ const switchCamera = useCallback(async () => {
       return false;
     }
   }, [featuredUserId, addDebugLog]);
-// 进入房间后，确保放大区域显示本地视频
-useEffect(() => {
-  if (isInRoom && localStreamRef.current && featuredVideoRef.current && featuredUserId === null) {
-    addDebugLog('🎯 进入房间后同步本地流到放大区域');
-    featuredVideoRef.current.srcObject = localStreamRef.current;
-    featuredVideoRef.current.play().catch(e => addDebugLog(`播放失败: ${e.message}`));
-  }
-}, [isInRoom, featuredUserId, addDebugLog]);
+
   // 设置本地视频显示
 // 设置本地视频显示（已修复：刚进房间自动显示顶部大画面）
-// 设置本地视频显示
 const setupLocalVideo = useCallback((stream) => {
   if (localVideoRef.current) {
     addDebugLog('✅ 本地视频元素已绑定');
@@ -202,26 +194,14 @@ const setupLocalVideo = useCallback((stream) => {
     };
   }
   
-  // 🔥 修复：延迟执行，确保 featuredVideoRef 已经绑定到 DOM
-  setTimeout(() => {
-    if (featuredVideoRef.current) {
-      addDebugLog('🔥 自动设置顶部放大区域为本地画面（默认显示自己）');
-      featuredVideoRef.current.srcObject = stream;
-      featuredVideoRef.current.onloadedmetadata = () => {
-        featuredVideoRef.current.play().catch(e => addDebugLog(`顶部视频播放失败: ${e.message}`));
-      };
-    } else {
-      addDebugLog('⚠️ featuredVideoRef 尚未绑定，重试中...');
-      // 再次重试
-      setTimeout(() => {
-        if (featuredVideoRef.current) {
-          featuredVideoRef.current.srcObject = stream;
-          featuredVideoRef.current.play().catch(e => {});
-          addDebugLog('✅ 延迟重试成功');
-        }
-      }, 100);
-    }
-  }, 50);
+  // 🔥 修复点：强制一进来就把自己绑定到顶部放大区域
+  if (featuredVideoRef.current) {
+    addDebugLog('🔥 自动设置顶部放大区域为本地画面（默认显示自己）');
+    featuredVideoRef.current.srcObject = stream; // 强制赋值
+    featuredVideoRef.current.onloadedmetadata = () => {
+      featuredVideoRef.current.play().catch(e => addDebugLog(`顶部视频播放失败: ${e.message}`));
+    };
+  }
 }, [addDebugLog]);
 
   // 获取本地媒体流（支持指定摄像头方向）
@@ -722,9 +702,10 @@ const setupLocalVideo = useCallback((stream) => {
 
   return (
     <div className={styles.container}>
-      {/* 调试面板（可折叠，悬浮层最高） */}
+      <h2 className={styles.title}>📹 视频通话</h2>
+
       <div className={styles.debugPanel}>
-        <details>
+        <details open>
           <summary>🔍 调试信息 ({debugInfo.length})</summary>
           <div className={styles.debugContent}>
             {debugInfo.map((log, idx) => (
@@ -764,16 +745,8 @@ const setupLocalVideo = useCallback((stream) => {
         </div>
       ) : (
         <div className={styles.callContainer}>
-          {/* 全景视频画面 - 作为背景层，占据全屏 */}
-          <div className={styles.fullscreenVideoWrapper}>
-            <video
-              ref={featuredVideoRef}
-              className={styles.fullscreenVideo}
-              autoPlay
-              playsInline
-              muted={featuredUserId === null}
-              webkit-playsinline="true"
-            />
+          {/* 放大区域 - 显示被点击放大的画面 */}
+          <div className={styles.featuredArea}>
             <div className={styles.videoLabel}>
               {featuredUserId === null ? (
                 <>我 ({userIdRef.current?.slice(-6)})</>
@@ -782,95 +755,103 @@ const setupLocalVideo = useCallback((stream) => {
               )}
               <span className={styles.statusConnected}> ● 已连接</span>
             </div>
+            <video
+              ref={featuredVideoRef}
+              className={styles.featuredVideo}
+              autoPlay
+              playsInline
+              muted={featuredUserId === null}
+              webkit-playsinline="true"
+            />
           </div>
 
-          {/* 悬浮控制栏和缩略图 */}
-          <div className={styles.overlayControls}>
-            {/* 控制栏 - 底部偏上 */}
-            <div className={styles.controls}>
-              <button
-                onClick={toggleAudio}
-                className={audioEnabled ? styles.controlBtn : `${styles.controlBtn} ${styles.controlBtnDisabled}`}
-              >
-                {audioEnabled ? '🎤 麦克风开' : '🔇 麦克风关'}
-              </button>
-              <button
-                onClick={toggleVideo}
-                className={videoEnabled ? styles.controlBtn : `${styles.controlBtn} ${styles.controlBtnDisabled}`}
-              >
-                {videoEnabled ? '📷 摄像头开' : '🚫 摄像头关'}
-              </button>
-              <button
-                onClick={switchCamera}
-                className={`${styles.controlBtn} ${styles.cameraSwitchBtn}`}
-              >
-                🔄 切换摄像头
-              </button>
-              <button
-                onClick={leaveRoom}
-                className={`${styles.controlBtn} ${styles.controlBtnHangup}`}
-              >
-                📞 挂断
-              </button>
-              <button
-                onClick={openDevicePicker}
-                className={styles.controlBtn}
-              >
-                📷 选择摄像头
-              </button>
-            </div>
+          {/* 控制栏 */}
+          <div className={styles.controls}>
+            <button
+              onClick={toggleAudio}
+              className={audioEnabled ? styles.controlBtn : `${styles.controlBtn} ${styles.controlBtnDisabled}`}
+            >
+              {audioEnabled ? '🎤 麦克风开' : '🔇 麦克风关'}
+            </button>
+            <button
+              onClick={toggleVideo}
+              className={videoEnabled ? styles.controlBtn : `${styles.controlBtn} ${styles.controlBtnDisabled}`}
+            >
+              {videoEnabled ? '📷 摄像头开' : '🚫 摄像头关'}
+            </button>
+            <button
+              onClick={switchCamera}
+              className={`${styles.controlBtn} ${styles.cameraSwitchBtn}`}
+            >
+              🔄 切换摄像头
+            </button>
+            <button
+              onClick={leaveRoom}
+              className={`${styles.controlBtn} ${styles.controlBtnHangup}`}
+            >
+              📞 挂断
+            </button>
+            <button
+              onClick={openDevicePicker}
+              className={styles.controlBtn}
+            >
+              📷 选择摄像头
+            </button>
+          </div>
 
-            {/* 底部缩略图区域 - 悬浮层 */}
-            <div className={styles.thumbnailSection}>
-              <div className={styles.thumbnailGrid}>
-                {/* 自己的缩略图 */}
+          {/* 底部缩略图区域 */}
+          <div className={styles.thumbnailSection}>
+            <h4 className={styles.sectionTitle}>
+              通话成员 ({users.length + 1}人) - 点击画面放大
+            </h4>
+            <div className={styles.thumbnailGrid}>
+              {/* 自己的缩略图 */}
+              <div
+                className={`${styles.thumbnailCard} ${featuredUserId === null ? styles.activeThumbnail : ''}`}
+                onClick={() => handleThumbnailClick(null)}
+              >
+                <div className={styles.thumbnailLabel}>
+                  我 ({userIdRef.current?.slice(-6)})
+                </div>
+                <video
+                  ref={localVideoRef}
+                  className={styles.thumbnailVideo}
+                  autoPlay
+                  muted
+                  playsInline
+                  webkit-playsinline="true"
+                />
+                <div className={styles.thumbnailStatus}>✅ 已连接</div>
+              </div>
+
+              {/* 远端用户缩略图 */}
+              {users.map(userId => (
                 <div
-                  className={`${styles.thumbnailCard} ${featuredUserId === null ? styles.activeThumbnail : ''}`}
-                  onClick={() => handleThumbnailClick(null)}
+                  key={userId}
+                  className={`${styles.thumbnailCard} ${featuredUserId === userId ? styles.activeThumbnail : ''}`}
+                  onClick={() => handleThumbnailClick(userId)}
                 >
                   <div className={styles.thumbnailLabel}>
-                    我 ({userIdRef.current?.slice(-6)})
+                    用户 {userId.slice(-6)}
                   </div>
                   <video
-                    ref={localVideoRef}
+                    ref={(el) => setVideoRef(userId, el)}
                     className={styles.thumbnailVideo}
                     autoPlay
-                    muted
                     playsInline
                     webkit-playsinline="true"
                   />
-                  <div className={styles.thumbnailStatus}>✅ 已连接</div>
+                  <div className={styles.thumbnailStatus}>
+                    {connectedPeers.has(userId) ? '✅ 已连接' : '⏳ 连接中...'}
+                  </div>
                 </div>
+              ))}
 
-                {/* 远端用户缩略图 */}
-                {users.map(userId => (
-                  <div
-                    key={userId}
-                    className={`${styles.thumbnailCard} ${featuredUserId === userId ? styles.activeThumbnail : ''}`}
-                    onClick={() => handleThumbnailClick(userId)}
-                  >
-                    <div className={styles.thumbnailLabel}>
-                      用户 {userId.slice(-6)}
-                    </div>
-                    <video
-                      ref={(el) => setVideoRef(userId, el)}
-                      className={styles.thumbnailVideo}
-                      autoPlay
-                      playsInline
-                      webkit-playsinline="true"
-                    />
-                    <div className={styles.thumbnailStatus}>
-                      {connectedPeers.has(userId) ? '✅ 已连接' : '⏳ 连接中...'}
-                    </div>
-                  </div>
-                ))}
-
-                {users.length === 0 && (
-                  <div className={styles.emptyThumbnail}>
-                    🌟 等待其他人加入...
-                  </div>
-                )}
-              </div>
+              {users.length === 0 && (
+                <div className={styles.emptyThumbnail}>
+                  🌟 等待其他人加入...
+                </div>
+              )}
             </div>
           </div>
         </div>

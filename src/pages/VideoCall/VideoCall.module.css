@@ -1,75 +1,100 @@
+/* VideoCall.module.css - 微信风格视频通话界面 */
 .container {
-  max-width: 100%;
+  position: relative;
+  width: 100%;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 16px;
+  background: #000;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
 }
 
-.title {
-  text-align: center;
-  color: white;
-  margin-bottom: 20px;
-  font-size: 24px;
-}
-
-/* 调试面板 */
+/* 调试面板 - 悬浮在左上角，半透明，可折叠 */
 .debugPanel {
-  background: rgba(0,0,0,0.8);
-  border-radius: 12px;
-  margin-bottom: 16px;
-  padding: 8px;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 6px 12px;
   color: #0f0;
-  font-size: 12px;
+  font-size: 11px;
   font-family: monospace;
+  max-width: 280px;
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .debugPanel summary {
   cursor: pointer;
-  color: white;
-  padding: 8px;
+  color: #ccc;
+  font-size: 11px;
+  font-weight: normal;
+  user-select: none;
 }
 
 .debugContent {
-  max-height: 200px;
+  max-height: 180px;
   overflow-y: auto;
-  padding: 8px;
+  padding: 6px 0;
+  margin-top: 4px;
+  border-top: 1px solid #333;
 }
 
 .debugLog {
-  border-bottom: 1px solid #333;
-  padding: 4px 0;
-  font-size: 11px;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 3px 0;
+  font-size: 9px;
+  word-break: break-all;
 }
 
 /* 加入面板 */
 .joinPanel {
-  background: white;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85%;
+  max-width: 340px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 32px;
+  padding: 28px 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  text-align: center;
+  backdrop-filter: blur(10px);
+  z-index: 10;
 }
 
 .input {
   width: 100%;
-  padding: 16px;
+  padding: 14px 16px;
   font-size: 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 30px;
+  margin-bottom: 20px;
   box-sizing: border-box;
+  background: #f5f5f5;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input:focus {
+  border-color: #07c160;
+  background: white;
 }
 
 .joinButton {
   width: 100%;
-  padding: 16px;
-  font-size: 18px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  background: #07c160;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 30px;
   cursor: pointer;
-  font-weight: bold;
+  transition: opacity 0.2s;
 }
 
 .joinButton:disabled {
@@ -78,134 +103,194 @@
 
 .hint {
   margin-top: 16px;
-  color: #666;
-  font-size: 14px;
-  text-align: center;
+  color: #888;
+  font-size: 12px;
 }
 
-/* 通话容器 */
+/* 通话容器 - 全屏沉浸 */
 .callContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* 放大区域 */
-.featuredArea {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: #000;
-  border-radius: 20px;
   overflow: hidden;
-  position: relative;
-  aspect-ratio: 16/9;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
-.featuredVideo {
+/* 全景视频背景层 - 铺满全屏，作为底层 */
+.fullscreenVideoWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0a0a0a;
+  z-index: 1;
+}
+
+.fullscreenVideo {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #1a1a1a;
+  background: #000;
 }
 
-/* 控制栏 */
+/* 视频标签（悬浮在全景视频上） */
+.videoLabel {
+  position: absolute;
+  top: 60px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+}
+
+.statusConnected {
+  color: #4ade80;
+  font-size: 10px;
+}
+
+/* 悬浮控件层 - 位于底层视频之上 */
+.overlayControls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px 30px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 70%, transparent 100%);
+  pointer-events: auto;
+}
+
+/* 控制栏 - 微信风格圆润按钮 */
 .controls {
   display: flex;
-  gap: 12px;
   justify-content: center;
+  gap: 16px;
   flex-wrap: wrap;
-  background: white;
-  padding: 12px 16px;
-  border-radius: 60px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 8px;
 }
 
 .controlBtn {
-  padding: 10px 18px;
+  background: rgba(30, 30, 35, 0.85);
+  backdrop-filter: blur(12px);
   border: none;
-  border-radius: 40px;
+  border-radius: 50px;
+  padding: 10px 18px;
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 500;
+  color: white;
   cursor: pointer;
-  background: #f0f0f0;
-  color: #333;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.controlBtn:active {
+  transform: scale(0.96);
+  background: rgba(60, 60, 65, 0.9);
 }
 
 .controlBtnDisabled {
-  background: #f44336;
-  color: white;
+  background: rgba(200, 60, 50, 0.85);
+  color: #ffe0e0;
 }
 
 .controlBtnHangup {
-  background: #f44336;
+  background: #ff3b30;
   color: white;
+  font-weight: 600;
 }
 
 .cameraSwitchBtn {
-  background: #4f46e5;
-  color: white;
+  background: rgba(7, 193, 96, 0.85);
 }
 
-/* 缩略图区域 */
+/* 缩略图区域 - 横向滚动，悬浮卡片 */
 .thumbnailSection {
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 16px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0 12px;
+  /* 隐藏滚动条但保留功能（微信风格） */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.4) transparent;
 }
 
-.sectionTitle {
-  margin: 0 0 12px 0;
-  color: white;
-  font-size: 14px;
+.thumbnailSection::-webkit-scrollbar {
+  height: 3px;
+}
+.thumbnailSection::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thumbnailSection::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.4);
+  border-radius: 10px;
 }
 
 .thumbnailGrid {
   display: flex;
   gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scrollbar-width: thin;
+  padding: 0 8px;
 }
 
 .thumbnailCard {
-  flex: 0 0 140px;
-  background: #000;
-  border-radius: 16px;
+  flex: 0 0 auto;
+  width: 100px;
+  background: #1e1e1e;
+  border-radius: 20px;
   overflow: hidden;
   position: relative;
-  aspect-ratio: 4/3;
+  aspect-ratio: 4 / 3;
   cursor: pointer;
-  transition: transform 0.2s, border 0.2s;
-  border: 3px solid transparent;
+  transition: transform 0.2s, border 0.1s;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-.thumbnailCard:hover {
-  transform: scale(1.02);
+.thumbnailCard:active {
+  transform: scale(0.97);
 }
 
 .activeThumbnail {
-  border-color: #f97316;
-  box-shadow: 0 0 12px #f97316aa;
+  border-color: #07c160;
+  box-shadow: 0 0 0 2px rgba(7, 193, 96, 0.5);
 }
 
 .thumbnailVideo {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #1a1a1a;
+  background: #2a2a2a;
 }
 
 .thumbnailLabel {
   position: absolute;
   top: 6px;
   left: 6px;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
   color: white;
   padding: 2px 8px;
   border-radius: 20px;
-  font-size: 10px;
-  z-index: 1;
+  font-size: 9px;
+  font-weight: 500;
+  z-index: 2;
 }
 
 .thumbnailStatus {
@@ -215,48 +300,42 @@
   background: rgba(0,0,0,0.6);
   color: #4ade80;
   padding: 2px 6px;
-  border-radius: 12px;
-  font-size: 9px;
-  z-index: 1;
+  border-radius: 16px;
+  font-size: 8px;
+  font-weight: 500;
+  z-index: 2;
 }
 
 .emptyThumbnail {
   text-align: center;
-  padding: 30px;
+  padding: 30px 16px;
   color: #ccc;
-  font-size: 14px;
-  width: 100%;
+  font-size: 13px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
 }
 
-.videoLabel {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(0,0,0,0.6);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 24px;
-  font-size: 12px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.statusConnected {
-  color: #4CAF50;
-  font-size: 12px;
-}
-
+/* 错误提示 */
 .error {
-  background: #ffebee;
+  position: fixed;
+  top: 70px;
+  left: 16px;
+  right: 16px;
+  background: rgba(255, 235, 235, 0.95);
+  backdrop-filter: blur(8px);
   color: #c62828;
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  padding: 12px 18px;
+  border-radius: 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  z-index: 200;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border: 1px solid #ffcdd2;
 }
 
 .closeError {
@@ -265,39 +344,41 @@
   font-size: 20px;
   cursor: pointer;
   color: #c62828;
+  padding: 0 8px;
 }
 
-/* 移动端适配 */
-@media (max-width: 768px) {
-  .container {
-    padding: 12px;
+/* 移动端适配 - 调整按钮大小和间距 */
+@media (max-width: 560px) {
+  .controls {
+    gap: 10px;
   }
-  
-  .thumbnailCard {
-    flex: 0 0 110px;
-  }
-  
   .controlBtn {
     padding: 8px 14px;
     font-size: 12px;
   }
-  
-  .featuredArea {
-    border-radius: 16px;
+  .thumbnailCard {
+    width: 85px;
+  }
+  .videoLabel {
+    top: 50px;
+    font-size: 11px;
+    padding: 4px 12px;
+  }
+  .debugPanel {
+    max-width: 220px;
+    font-size: 9px;
   }
 }
 
-/* 滚动条样式 */
-.thumbnailGrid::-webkit-scrollbar {
-  height: 4px;
-}
-
-.thumbnailGrid::-webkit-scrollbar-track {
-  background: #334155;
-  border-radius: 4px;
-}
-
-.thumbnailGrid::-webkit-scrollbar-thumb {
-  background: #f97316;
-  border-radius: 4px;
+@media (max-width: 420px) {
+  .controlBtn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  .thumbnailCard {
+    width: 75px;
+  }
+  .thumbnailLabel {
+    font-size: 8px;
+  }
 }
