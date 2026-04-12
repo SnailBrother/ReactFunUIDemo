@@ -61,6 +61,12 @@ export const menuItems = [
     icon: <SettingOutlined />,
     label: 'NOServerVideoCall',
     component: lazy(() => import('./pages/NOServerVideoCall')),
+  },
+  {
+    key: '/MusicVisualization',
+    icon: <SettingOutlined />,
+    label: '音频可视化',
+    component: lazy(() => import('./pages/MusicVisualization')),
   }
 ];
 
