@@ -67,6 +67,12 @@ export const menuItems = [
     icon: <SettingOutlined />,
     label: '音频可视化',
     component: lazy(() => import('./pages/MusicVisualization')),
+  },
+  {
+    key: '/DogMove',
+    icon: <SettingOutlined />,
+    label: '小狗移动',
+    component: lazy(() => import('./pages/DogMove')),
   }
 ];
 
