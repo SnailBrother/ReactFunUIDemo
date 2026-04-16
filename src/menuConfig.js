@@ -57,10 +57,10 @@ export const menuItems = [
     component: lazy(() => import('./pages/VideoCall')),
   },
   {
-    key: '/NOServerVideoCall',
+    key: '/WordEditor',
     icon: <SettingOutlined />,
-    label: 'NOServerVideoCall',
-    component: lazy(() => import('./pages/NOServerVideoCall')),
+    label: 'Word编辑',
+    component: lazy(() => import('./pages/WordEditor')),
   },
   {
     key: '/MusicVisualization',
