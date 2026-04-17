@@ -39,10 +39,10 @@ export const menuItems = [
     component: lazy(() => import('./pages/WaterWave')),
   },
   {
-    key: '/audioWaveplayer',
+    key: '/Date',
     icon: <SettingOutlined />,
-    label: '音频可视化',
-    component: lazy(() => import('./pages/AudioWavePlayer')),
+    label: '日期控件',
+    component: lazy(() => import('./pages/Date')),
   },
   {
     key: '/Reader',
