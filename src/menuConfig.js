@@ -73,6 +73,12 @@ export const menuItems = [
     icon: <SettingOutlined />,
     label: '小狗移动',
     component: lazy(() => import('./pages/DogMove')),
+  },
+  {
+    key: '/TextExtraction',
+    icon: <SettingOutlined />,
+    label: '文字提取',
+    component: lazy(() => import('./pages/TextExtraction')),
   }
 ];
 
