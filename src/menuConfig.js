@@ -8,36 +8,7 @@ import {
 
 // 菜单配置（同时作为路由配置）
 export const menuItems = [
-  {
-    key: '/home',
-    icon: <HomeOutlined />,
-    label: '首页',
-    component: lazy(() => import('./pages/Home')),
-  },
-  {
-    key: '/user',
-    icon: <UserOutlined />,
-    label: '用户管理',
-    component: lazy(() => import('./pages/User')),
-  },
-  {
-    key: '/settings',
-    icon: <SettingOutlined />,
-    label: '系统设置',
-    component: lazy(() => import('./pages/Settings')),
-  },
-  {
-    key: '/login',
-    icon: <SettingOutlined />,
-    label: '登录',
-    component: lazy(() => import('./pages/LogIn')),
-  },
-  {
-    key: '/waterwave',
-    icon: <SettingOutlined />,
-    label: '水波动画',
-    component: lazy(() => import('./pages/WaterWave')),
-  },
+  
   {
     key: '/Date',
     icon: <SettingOutlined />,
@@ -45,16 +16,34 @@ export const menuItems = [
     component: lazy(() => import('./pages/Date')),
   },
   {
+    key: '/PaddleOCR',
+    icon: <SettingOutlined />,
+    label: 'Paddle文字提取',
+    component: lazy(() => import('./pages/PaddleOCR')),
+  },
+  {
+    key: '/PaddleOCRBatch',
+    icon: <SettingOutlined />,
+    label: 'Paddle批量文字提取',
+    component: lazy(() => import('./pages/PaddleOCRBatch')),
+  },
+  {
+    key: '/PythonOCR',
+    icon: <SettingOutlined />,
+    label: 'Python文字提取',
+    component: lazy(() => import('./pages/PythonOCR')),
+  },
+  {
+    key: '/DoubaoOCR',
+    icon: <SettingOutlined />,
+    label: ' DoubaoOCR文字提取',
+    component: lazy(() => import('./pages/DoubaoOCR')),
+  },
+  {
     key: '/Reader',
     icon: <SettingOutlined />,
     label: '阅读',
     component: lazy(() => import('./pages/Reader')),
-  },
-  {
-    key: '/VideoCall',
-    icon: <SettingOutlined />,
-    label: 'VideoCall',
-    component: lazy(() => import('./pages/VideoCall')),
   },
   {
     key: '/WordEditor',
@@ -75,11 +64,19 @@ export const menuItems = [
     component: lazy(() => import('./pages/DogMove')),
   },
   {
-    key: '/TextExtraction',
+    key: '/login',
     icon: <SettingOutlined />,
-    label: '文字提取',
-    component: lazy(() => import('./pages/TextExtraction')),
+    label: '登录',
+    component: lazy(() => import('./pages/LogIn')),
+  },
+  {
+    key: '/WaterWave',
+    icon: <SettingOutlined />,
+    label: '水波荡漾',
+    component: lazy(() => import('./pages/WaterWave')),
   }
+ 
+  
 ];
 
 // 生成路由配置（包含根路径）

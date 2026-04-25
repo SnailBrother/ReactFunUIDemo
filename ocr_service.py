@@ -1,75 +1,37 @@
-#!/usr/bin/env python3
-import sys
-import json
-import warnings
-warnings.filterwarnings('ignore')
-
+# ocr_service.py - Python OCR服务
 from paddleocr import PaddleOCR
+import cv2
+import numpy as np
+import base64
 
-# 初始化 PaddleOCR（中文模型）
-print("正在初始化 PaddleOCR...", file=sys.stderr)
-ocr = PaddleOCR(
-    lang='ch',  # 使用中文模型
-    use_angle_cls=False,  # 关闭角度分类，提高速度
-    show_log=False  # 关闭日志
-)
-print("PaddleOCR 初始化完成", file=sys.stderr)
-
-def ocr_image(image_path):
-    """识别图片中的文字"""
-    print(f"正在识别图片: {image_path}", file=sys.stderr)
+def extract_text_from_image(image_base64):
+    # 解码base64图像
+    image_bytes = base64.b64decode(image_base64)
+    image_array = np.frombuffer(image_bytes, dtype=np.uint8)
+    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     
-    # 执行 OCR
-    result = ocr.ocr(image_path, cls=False)
+    # 初始化PaddleOCR
+    ocr = PaddleOCR(use_angle_cls=True, lang='ch')  # 中文识别
     
-    if not result or not result[0]:
-        return {
-            'text': '',
-            'lines': [],
-            'raw_text': ''
-        }
+    # 执行OCR
+    result = ocr.ocr(image, cls=True)
     
-    texts = []
-    lines = []
+    # 提取文本
+    extracted_text = []
+    total_confidence = 0
+    count = 0
     
-    print("\n========== PaddleOCR 识别结果 ==========", file=sys.stderr)
-    for idx, line in enumerate(result[0]):
-        # line 格式: [[[x1,y1], [x2,y2], [x3,y3], [x4,y4]], [text, confidence]]
-        bbox_points = line[0]
-        text = line[1][0]
-        confidence = line[1][1]
-        
-        texts.append(text)
-        lines.append({
-            'text': text,
-            'confidence': float(confidence),
-            'bbox': [[int(x), int(y)] for x, y in bbox_points]
-        })
-        
-        print(f"[{idx+1}] 文本: {text}", file=sys.stderr)
-        print(f"    置信度: {confidence:.4f}", file=sys.stderr)
+    for line in result:
+        for item in line:
+            text = item[1][0]
+            confidence = item[1][1]
+            extracted_text.append(text)
+            total_confidence += confidence
+            count += 1
     
-    print("=====================================\n", file=sys.stderr)
-    print(f"总共识别到 {len(result[0])} 个文本块", file=sys.stderr)
-    
-    full_text = '\n'.join(texts)
-    print(f"完整文本:\n{full_text}", file=sys.stderr)
+    average_confidence = (total_confidence / count * 100) if count > 0 else 0
     
     return {
-        'text': full_text,
-        'lines': lines,
-        'raw_text': ' '.join(texts)
+        'text': '\n'.join(extracted_text),
+        'confidence': round(average_confidence, 2)
     }
-
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(json.dumps({'error': 'No image path provided'}))
-        sys.exit(1)
-    
-    image_path = sys.argv[1]
-    try:
-        result = ocr_image(image_path)
-        print(json.dumps(result, ensure_ascii=False))
-    except Exception as e:
-        print(json.dumps({'error': str(e)}, ensure_ascii=False), file=sys.stderr)
-        sys.exit(1)

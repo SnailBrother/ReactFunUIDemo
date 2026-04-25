@@ -1,0 +1,643 @@
+/* 主容器 - 左右两栏布局 */
+.container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* 左侧面板 - 提取的文字区域 */
+.leftPanel {
+  flex: 1;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  animation: slideInLeft 0.5s ease-out;
+}
+
+/* 右侧面板 - 上传图片区域 */
+.rightPanel {
+  flex: 1;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInRight 0.5s ease-out;
+}
+
+/* 面板头部 */
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-bottom: 2px solid #e0e7ff;
+}
+
+.panelHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panelHeader h3::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+/* 按钮组 */
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.copyButton,
+.clearButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.copyButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.copyButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.clearButton {
+  background: #f0f0f0;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.clearButton:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* 模型状态指示器 */
+.modelStatus {
+  font-size: 12px;
+  color: #52c41a;
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #b7eb8f;
+  font-weight: 500;
+  animation: pulse 2s infinite;
+}
+
+/* 文本内容区域 */
+.textContent {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: #fafbfc;
+  min-height: 400px;
+}
+
+/* 加载容器 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+/* 进度条 */
+.progressBar {
+  width: 200px;
+  height: 6px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+.loadingHint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+}
+
+/* 提取的文字区域 */
+.extractedText {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.extractedText pre {
+  margin: 0;
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* 占位符 */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+  color: #999;
+  text-align: center;
+}
+
+.placeholder p {
+  margin: 8px 0;
+}
+
+.placeholderHint {
+  font-size: 12px;
+  color: #bbb;
+}
+
+/* 错误提示 */
+.error {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%);
+  border-left: 4px solid #ff4d4f;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: shake 0.5s;
+}
+
+.error span {
+  color: #ff4d4f;
+  font-size: 14px;
+  flex: 1;
+}
+
+.errorClose {
+  background: none;
+  border: none;
+  color: #ff4d4f;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: all 0.2s;
+}
+
+.errorClose:hover {
+  color: #ff7875;
+  transform: scale(1.2);
+}
+
+/* 上传区域 */
+.uploadArea {
+  margin: 24px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 12px;
+  background: #fafbfc;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.uploadArea:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.dragOver {
+  border-color: #667eea;
+  background: #e8eeff;
+  transform: scale(0.98);
+}
+
+/* 图片预览 */
+.imagePreview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.imagePreview img {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.removeImage {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.removeImage:hover {
+  background: rgba(255, 77, 79, 0.9);
+  transform: scale(1.1);
+}
+
+/* 上传占位符 */
+.uploadPlaceholder {
+  text-align: center;
+  padding: 40px;
+}
+
+.uploadPlaceholder svg {
+  color: #d9d9d9;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.uploadArea:hover .uploadPlaceholder svg {
+  color: #667eea;
+  transform: translateY(-4px);
+}
+
+.uploadPlaceholder p {
+  margin: 8px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.uploadPlaceholder span {
+  color: #999;
+  font-size: 12px;
+}
+
+/* 按钮区域 */
+.buttonArea {
+  display: flex;
+  gap: 12px;
+  margin: 0 24px 24px 24px;
+  flex-wrap: wrap;
+}
+
+.extractButton,
+.detailButton,
+.resetButton {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.extractButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.extractButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.detailButton {
+  background: linear-gradient(135deg, #52c41a 0%, #237804 100%);
+  color: white;
+}
+
+.detailButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(82, 196, 26, 0.4);
+}
+
+.resetButton {
+  background: #f0f0f0;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.resetButton:hover:not(:disabled) {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.extractButton:disabled,
+.detailButton:disabled,
+.resetButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 图片信息 */
+.imageInfo {
+  margin: 0 24px 24px 24px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.imageInfo p {
+  margin: 4px 0;
+}
+
+/* 动画 */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+/* 滚动条样式 */
+.textContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.textContent::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.textContent::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.textContent::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .leftPanel,
+  .rightPanel {
+    min-height: auto;
+  }
+  
+  .buttonArea {
+    flex-direction: column;
+  }
+  
+  .panelHeader {
+    padding: 16px;
+  }
+  
+  .textContent {
+    padding: 16px;
+    min-height: 300px;
+  }
+  
+  .uploadArea {
+    margin: 16px;
+    min-height: 200px;
+  }
+  
+  .buttonArea {
+    margin: 0 16px 16px 16px;
+  }
+  
+  .imageInfo {
+    margin: 0 16px 16px 16px;
+  }
+}
+
+/* 暗色模式支持（可选） */
+@media (prefers-color-scheme: dark) {
+  .leftPanel,
+  .rightPanel {
+    background: #1f1f1f;
+  }
+  
+  .panelHeader {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  }
+  
+  .panelHeader h3 {
+    color: #e0e0e0;
+  }
+  
+  .textContent {
+    background: #2d2d2d;
+  }
+  
+  .extractedText {
+    background: #1f1f1f;
+  }
+  
+  .extractedText pre {
+    color: #e0e0e0;
+  }
+  
+  .uploadArea {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+  
+  .uploadPlaceholder p {
+    color: #b0b0b0;
+  }
+  
+  .imageInfo {
+    background: #2d2d2d;
+    color: #b0b0b0;
+  }
+}
+/* 在现有 CSS 文件末尾添加以下样式 */
+
+/* Tab 切换栏 */
+.tabBar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px 0 24px;
+  background: #fafbfc;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.tabButton {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tabButton:hover:not(:disabled) {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.tabButton.activeTab {
+  color: #667eea;
+  background: white;
+}
+
+.tabButton.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+.tabButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 暗色模式下的 Tab 样式 */
+@media (prefers-color-scheme: dark) {
+  .tabBar {
+    background: #2d2d2d;
+    border-bottom-color: #404040;
+  }
+  
+  .tabButton {
+    color: #b0b0b0;
+  }
+  
+  .tabButton:hover:not(:disabled) {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.15);
+  }
+  
+  .tabButton.activeTab {
+    color: #667eea;
+    background: #1f1f1f;
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .tabBar {
+    padding: 8px 16px 0 16px;
+  }
+  
+  .tabButton {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}

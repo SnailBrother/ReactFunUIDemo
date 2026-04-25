@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Spin } from 'antd';
+ 
 import Sidebar from './components/Sidebar';
 import { routes } from './menuConfig';
 
@@ -19,7 +19,7 @@ const LoadingComponent = () => (
     alignItems: 'center', 
     height: '100vh' 
   }}>
-    <Spin size="large" tip="加载中..." />
+     
   </div>
 );
 

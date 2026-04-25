@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
-import axios from 'axios';
 import styles from './index.module.css';
 
-const TextExtraction = () => {
+const OcrTextExtraction = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [extractedText, setExtractedText] = useState('');
@@ -22,12 +21,13 @@ const TextExtraction = () => {
       };
       reader.readAsDataURL(file);
       setError('');
+      setExtractedText('');
     } else {
       setError('请选择有效的图片文件');
     }
   };
 
-  // 处理拖拽上传
+  // 拖拽上传
   const handleDragOver = (e) => {
     e.preventDefault();
     setDragOver(true);
@@ -50,12 +50,13 @@ const TextExtraction = () => {
       };
       reader.readAsDataURL(file);
       setError('');
+      setExtractedText('');
     } else {
       setError('请拖拽有效的图片文件');
     }
   };
 
-  // 提取文字
+  // ✅ 核心：调用你的 Python OCR 接口
   const handleExtractText = async () => {
     if (!selectedImage) {
       setError('请先选择一张图片');
@@ -66,25 +67,37 @@ const TextExtraction = () => {
     setError('');
     setExtractedText('');
 
-    const formData = new FormData();
-    formData.append('image', selectedImage);
-
     try {
-      const response = await axios.post('http://localhost:3001/api/extract-text', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 30000, // 30秒超时
-      });
+      const reader = new FileReader();
+      
+      reader.onload = async (e) => {
+        const base64Image = e.target.result;
 
-      if (response.data.success) {
-        setExtractedText(response.data.text);
-      } else {
-        setError(response.data.message || '文字提取失败');
-      }
+        // 调用后端 Flask 服务
+        const res = await fetch('http://127.0.0.1:5000/extract', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Image
+          })
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+          setExtractedText(data.text);
+        } else {
+          setError(data.message || '识别失败');
+        }
+      };
+      
+      reader.readAsDataURL(selectedImage);
+      
     } catch (err) {
-      console.error('提取文字失败:', err);
-      setError(err.response?.data?.message || '提取文字失败，请稍后重试');
+      console.error('识别失败:', err);
+      setError('无法连接 OCR 服务，请检查后端是否启动！');
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +114,7 @@ const TextExtraction = () => {
     }
   };
 
-  // 复制文字到剪贴板
+  // 复制文字
   const handleCopyText = () => {
     if (extractedText) {
       navigator.clipboard.writeText(extractedText);
@@ -141,13 +154,12 @@ const TextExtraction = () => {
         </div>
       </div>
 
-      {/* 右侧：上传图片和开始提取 */}
+      {/* 右侧：上传图片 */}
       <div className={styles.rightPanel}>
         <div className={styles.panelHeader}>
           <h3>图片上传</h3>
         </div>
 
-        {/* 上传区域 */}
         <div
           className={`${styles.uploadArea} ${dragOver ? styles.dragOver : ''}`}
           onDragOver={handleDragOver}
@@ -177,16 +189,15 @@ const TextExtraction = () => {
             </div>
           ) : (
             <div className={styles.uploadPlaceholder}>
-              <svg viewBox="0 0 24 24" fill="currentColor">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
               </svg>
               <p>点击或拖拽图片到此处上传</p>
-              <span>支持 JPG、PNG、BMP、TIFF 等格式</span>
+              <span>支持 JPG、PNG、BMP 等格式</span>
             </div>
           )}
         </div>
 
-        {/* 按钮区域 */}
         <div className={styles.buttonArea}>
           <button
             className={styles.extractButton}
@@ -204,7 +215,6 @@ const TextExtraction = () => {
           </button>
         </div>
 
-        {/* 图片信息 */}
         {selectedImage && (
           <div className={styles.imageInfo}>
             <p>文件名：{selectedImage.name}</p>
@@ -216,4 +226,4 @@ const TextExtraction = () => {
   );
 };
 
-export default TextExtraction;
+export default OcrTextExtraction;
