@@ -28,6 +28,25 @@ export const menuItems = [
     component: lazy(() => import('./pages/PaddleOCRBatch')),
   },
   {
+    key: '/AIStudio',
+    icon: <SettingOutlined />,
+    label: 'AIStudio文字提取',
+    component: lazy(() => import('./pages/AIStudio')),
+  },
+  {
+    key: '/AIStudioDownload',
+    icon: <SettingOutlined />,
+    label: 'AIStudio表格下载',
+    component: lazy(() => import('./pages/AIStudioDownload')),
+  },
+  {
+    key: '/Tesseract',
+    icon: <SettingOutlined />,
+    label: 'Tesseract文字提取',
+    component: lazy(() => import('./pages/Tesseract')),
+  },
+  
+  {
     key: '/PythonOCR',
     icon: <SettingOutlined />,
     label: 'Python文字提取',

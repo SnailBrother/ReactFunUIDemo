@@ -1,0 +1,1 @@
+# https://aistudio.baidu.com/paddleocr/task/new

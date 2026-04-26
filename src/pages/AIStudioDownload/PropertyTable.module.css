@@ -1,0 +1,198 @@
+/* index.module.css */
+.propertyContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 16px;
+  font-family: "Microsoft Yahei", sans-serif;
+  color: #333;
+}
+
+/* 搜索工具栏 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 280px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: #4096ff;
+}
+
+.countText {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 空数据提示 */
+.emptyTip {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+/* 证书列表容器 */
+.certificateList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 单个证书卡片 */
+.certificateCard {
+  background: #fdfbf8; /* 模拟证书浅底色 */
+  border: 1px solid #e8e0d5;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 证书标题栏 */
+.certificateHeader {
+  background: #f0e9df;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none; /* 防止文字被选中 */
+}
+/* 可选：悬浮时增加背景变化，提示可点击 */
+.certificateHeader:hover {
+  background: #e9e0d2;
+}
+.headerTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c2a27;
+}
+
+.certNumber {
+  font-size: 25px;
+  color: #666;
+  font-family: monospace; 
+  font-weight: 600;
+  text-align: center;
+  align-items: center;
+}
+
+/* 核心表格样式（匹配不动产证格式） */
+.propertyTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.tableRow {
+  border-bottom: 1px dashed #e0d6c8;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+/* 左侧字段名单元格 */
+.fieldLabelCell {
+  padding: 12px 20px;
+  text-align: right;
+  font-weight: 500;
+  color: #555;
+  background: #f8f5f0;
+  white-space: nowrap;
+}
+
+/* 右侧值单元格 */
+.fieldValueCell {
+  padding: 12px 20px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.fieldValueCell:hover {
+  background: #faf6f0;
+}
+
+/* 权利其他状况 竖排文字样式 */
+.otherStatusRow {
+  border-bottom: 1px dashed #e0d6c8;
+}
+
+.otherStatusLabelCell {
+  /* 关键修改：右内边距从10px 改为 15px/20px，保留右侧边距；text-align 改为 end（兼容所有布局） */
+  padding: 12px 25px 12px 15px; /* 上下12px，右15px（保留边距），左15px，左右边距对称 */
+  text-align: end; /* 等同于right，但兼容性更好，文字靠右但留边距 */
+  font-weight: 500;
+  color: #555;
+  background: #f8f5f0;
+  vertical-align: middle;
+}
+
+.verticalText {
+  writing-mode: vertical-rl; /* 竖排文字 */
+  text-orientation: upright; /* 文字正立 */
+  font-size: 14px;
+  letter-spacing: 2px;
+  /* 移除text-align: right，避免双重靠右导致贴边 */
+  display: inline-block;
+  margin-right: 5px; /* 可选：给文字本身加5px右边距，进一步微调 */
+}
+
+/* 其他状况子字段标签 */
+.subFieldLabel {
+  font-weight: 500;
+  color: #555;
+  margin-right: 8px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .fieldLabelCell {
+    width: 100px !important;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .fieldValueCell {
+    padding: 10px 12px;
+    font-size: 14px;
+    word-break: break-all;
+  }
+  
+  .certificateHeader {
+    padding: 12px 16px;
+  }
+  
+  .headerTitle {
+    font-size: 16px;
+  }
+
+  /* 移动端竖排文字改为横排 */
+  .verticalText {
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+
+  .otherStatusLabelCell {
+    rowSpan: 1 !important;
+    padding: 8px 12px;
+  }
+}
