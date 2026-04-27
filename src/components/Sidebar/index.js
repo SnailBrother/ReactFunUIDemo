@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { menuItems } from '../../menuConfig';
+
 import styles from './index.module.css';
 
 const Sidebar = ({ children }) => {

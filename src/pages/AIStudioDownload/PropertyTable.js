@@ -101,7 +101,9 @@ const PropertyTable = ({ data }) => {
               {/* 证书标题栏 */}
               <div 
                 className={styles.certificateHeader}
-                onClick={() => handleSort('产权证号')}
+                 onClick={() => handleCopy(cert.产权证号)}
+                style={{ cursor: 'pointer' }}
+                // onClick={() => handleSort('产权证号')}
               >
                 
                 <span className={styles.certNumber}>{cert.产权证号 || '无编号'}</span>

@@ -27,10 +27,7 @@ const AIStudio = () => {
 
   const fileInputRef = useRef(null);
 
-  const API_CONFIG = {
-    proxyUrl: 'http://localhost:3001/api/ocr'
-  };
-
+  
   // PDF 转图片
   const pdfToImages = async (pdfFile) => {
     try {
@@ -142,7 +139,7 @@ const AIStudio = () => {
   const callOCRAPI = async (imageBase64) => {
     try {
       const base64Data = imageBase64.split(',')[1];
-      const response = await fetch(API_CONFIG.proxyUrl, {
+      const response = await fetch('/api/ocr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64Data, type: 'ocr' })
@@ -548,27 +545,34 @@ const handleProcessFiles = async () => {
   }
 
   // 解析使用期限：只提取日期部分
-  function parseDate(dateText) {
+function parseDate(dateText) {
     if (!dateText) return '';
 
-    // 匹配日期格式：2052年05月14日 或 2052-05-14 等
-    const dateMatch = dateText.match(/(\d{4})[年\-\/](\d{1,2})[月\-\/](\d{1,2})/);
-    if (dateMatch) {
-      const year = dateMatch[1];
-      const month = dateMatch[2].padStart(2, '0');
-      const day = dateMatch[3].padStart(2, '0');
-      // 返回 Date 对象，这样 Excel 才能识别为日期类型
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    // 更灵活的匹配：提取任意位置的日期格式
+    const patterns = [
+      /(\d{4})年(\d{1,2})月(\d{1,2})日/,  // 2059年05月17日
+      /(\d{4})-(\d{1,2})-(\d{1,2})/,      // 2059-05-17
+      /(\d{4})\/(\d{1,2})\/(\d{1,2})/     // 2059/05/17
+    ];
+
+    for (const pattern of patterns) {
+      const match = dateText.match(pattern);
+      if (match) {
+        const year = match[1];
+        const month = match[2].padStart(2, '0');
+        const day = match[3].padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
     }
 
-    // 如果只有年份，如 "2052年"
+    // 如果只有年份
     const yearMatch = dateText.match(/(\d{4})年/);
     if (yearMatch) {
       return `${yearMatch[1]}-01-01`;
     }
 
     return dateText;
-  }
+}
 
   // 解析套内面积：只提取数值
   function parseInnerArea(innerAreaText) {
