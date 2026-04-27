@@ -93,6 +93,12 @@ export const menuItems = [
     icon: <SettingOutlined />,
     label: '水波荡漾',
     component: lazy(() => import('./pages/WaterWave')),
+  },
+  {
+    key: '/TextToImage',
+    icon: <SettingOutlined />,
+    label: '文生图',
+    component: lazy(() => import('./pages/TextToImage')),
   }
  
   

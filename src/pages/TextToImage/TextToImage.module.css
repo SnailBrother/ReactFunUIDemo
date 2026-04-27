@@ -1,0 +1,386 @@
+/* 全局页面 */
+.page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ---------------------
+   控制面板样式
+--------------------- */
+.controlPanel {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panelHeader {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.aiIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.panelHeader h2 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.subtitle {
+  color: #666;
+  margin: 0;
+  font-size: 14px;
+}
+
+.formItem {
+  margin-bottom: 24px;
+}
+
+.formItem label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #444;
+  font-size: 15px;
+}
+
+.formItem textarea {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  resize: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+  font-family: inherit;
+}
+
+.formItem textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* 上传区域 */
+.uploadArea {
+  border: 2px dashed #d0d0d0;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.uploadArea:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadLabel {
+  cursor: pointer;
+  color: #667eea;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.preview {
+  width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  display: block;
+}
+
+/* 开始按钮 */
+.startBtn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.startBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.startBtn:active {
+  transform: translateY(0);
+}
+
+/* ---------------------
+   对话界面 - 100dvh 满屏
+--------------------- */
+.chatFullScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  background: #f5f6fa;
+  z-index: 100;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.chatWrapper {
+  width: 100%;
+  height: 100dvh;
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+}
+
+/* 对话头部 */
+.chatHeader {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.aiAvatar {
+  font-size: 32px;
+}
+
+.headerInfo h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.onlineStatus {
+  font-size: 11px;
+  opacity: 0.9;
+  color: #b8ffb8;
+}
+
+/* 消息区域 */
+.messagesArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f5f6fa;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 用户消息 */
+.userMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.userMessage .messageBubble {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 16px 16px 4px 16px;
+  max-width: 85%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.messageTime {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  padding-right: 4px;
+}
+
+/* AI消息 */
+.aiMessage {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.aiAvatarSmall {
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.messageContent {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 等待动画气泡 */
+.waitingBubble {
+  background: white;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: inline-block;
+}
+
+.waitingAnimation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.waitingSpinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e0e0e0;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.waitingAnimation span {
+  color: #666;
+  font-size: 14px;
+}
+
+/* 结果卡片 */
+.resultCard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.resultImageWrapper {
+  width: 100%;
+  min-height: 400px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+}
+
+.resultImage {
+  width: 100%;
+  height: auto;
+  max-height: 800px;
+  object-fit: contain;
+  display: block;
+}
+
+.resultActions {
+  padding: 12px;
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
+}
+
+.downloadBtn {
+  display: inline-block;
+  padding: 8px 20px;
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.3s;
+}
+
+.downloadBtn:hover {
+  background: #5a6fd8;
+}
+
+/* 底部操作区 */
+.chatFooter {
+  padding: 12px 20px;
+  background: white;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.backBtn,
+.regenerateBtn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.backBtn {
+  background: #f0f0f0;
+  color: #666;
+  flex: 1;
+}
+
+.backBtn:hover {
+  background: #e0e0e0;
+}
+
+.regenerateBtn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex: 1;
+}
+
+.regenerateBtn:hover {
+  opacity: 0.9;
+}
