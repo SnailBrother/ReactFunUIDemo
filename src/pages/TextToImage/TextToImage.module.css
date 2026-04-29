@@ -303,23 +303,10 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-.resultImageWrapper {
-  width: 100%;
-  min-height: 400px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-}
 
-.resultImage {
-  width: 100%;
-  height: auto;
-  max-height: 800px;
-  object-fit: contain;
-  display: block;
-}
+
+
+
 
 .resultActions {
   padding: 12px;
