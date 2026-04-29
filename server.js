@@ -255,7 +255,7 @@ async function extractPropertyInfoWithAI(text, htmlExtracted) {
                     'Authorization': `Bearer ${AI_MODEL_CONFIG.accessToken}`,
                     'Content-Type': 'application/json'
                 },
-                timeout: 60000
+                timeout: 1800000
             }
         );
 
@@ -358,7 +358,7 @@ app.post('/api/ocr-and-extract', async (req, res) => {
                 'Authorization': `token ${PADDLE_CONFIG.accessToken}`,
                 'Content-Type': 'application/json'
             },
-            timeout: 30000
+            timeout: 1800000
         });
 
         console.log('OCR识别完成！');
@@ -487,7 +487,7 @@ app.post('/api/ocr', async (req, res) => {
                 'Authorization': `token ${PADDLE_CONFIG.accessToken}`,
                 'Content-Type': 'application/json'
             },
-            timeout: 30000
+            timeout: 1800000
         });
         
         res.json(response.data);
