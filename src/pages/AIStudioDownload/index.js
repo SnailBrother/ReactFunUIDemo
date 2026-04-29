@@ -1,10 +1,8 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import * as pdfjsLib from 'pdfjs-dist';
 import styles from './index.module.css';
 import PropertyTable from './PropertyTable';
-import { parsePropertyInfo } from './propertyParser';
-import { Tesseract } from './Tesseract';//这个主要是用来初步筛选哪些页面需要识别，不然全部识别会浪费时间、金钱及api得额度
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
@@ -17,17 +15,11 @@ const AIStudio = () => {
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [parseProgress, setParseProgress] = useState(0);
-  const [activeTab, setActiveTab] = useState('table'); // table | raw | json
-
-  // 调试相关状态
-  const [debugData, setDebugData] = useState({
-    allRawText: '',
-    allJsonResponse: []
-  });
+  const [activeTab, setActiveTab] = useState('table');
+  const [debugData, setDebugData] = useState({ allRawText: '', allJsonResponse: [] });
 
   const fileInputRef = useRef(null);
 
-  
   // PDF 转图片
   const pdfToImages = async (pdfFile) => {
     try {
@@ -40,28 +32,18 @@ const AIStudio = () => {
       for (let i = 1; i <= totalPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 2.0 });
-
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
-        await page.render({
-          canvasContext: context,
-          viewport: viewport
-        }).promise;
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
 
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
         const url = URL.createObjectURL(blob);
 
-        pages.push({
-          pageNumber: i,
-          blob: blob,
-          url: url,
-          originalFile: pdfFile
-        });
+        pages.push({ pageNumber: i, blob, url, originalFile: pdfFile });
       }
-
       return pages;
     } catch (error) {
       console.error('PDF 转图片失败:', error);
@@ -94,7 +76,7 @@ const AIStudio = () => {
                 url: reader.result,
                 name: file.name,
                 pageNumber: 1,
-                file: file,
+                file,
                 size: file.size
               });
             };
@@ -112,7 +94,7 @@ const AIStudio = () => {
                 url: page.url,
                 name: file.name,
                 pageNumber: page.pageNumber,
-                file: file,
+                file,
                 blob: page.blob,
                 size: file.size
               });
@@ -135,208 +117,107 @@ const AIStudio = () => {
     }
   }, []);
 
-  // 调用OCR API
-  const callOCRAPI = async (imageBase64) => {
-    try {
-      const base64Data = imageBase64.split(',')[1];
-      const response = await fetch('/api/ocr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64Data, type: 'ocr' })
-      });
+  // 调用后端统一接口：OCR + AI提取
+  const callExtractAPI = async (imageBase64) => {
+    const base64Data = imageBase64.split(',')[1] || imageBase64;
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    const response = await fetch('/api/ocr-and-extract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64Data })
+    });
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('OCR API调用失败:', error);
-      throw error;
-    }
-  };
-
-  // 从OCR结果中提取文本
-  const extractTextFromOCRResult = (result) => {
-    let fullText = '';
-
-    try {
-      if (result && typeof result === 'object') {
-        let dataSource = result.result || result.data || result;
-
-        if (typeof dataSource === 'string') {
-          try {
-            dataSource = JSON.parse(dataSource);
-          } catch (e) {
-            fullText = dataSource;
-          }
-        }
-
-        if (dataSource.layoutParsingResults) {
-          for (const layoutResult of dataSource.layoutParsingResults) {
-            if (layoutResult.markdown?.text) {
-              fullText += layoutResult.markdown.text + '\n';
-            }
-            if (layoutResult.tableResult?.html) {
-              fullText += layoutResult.tableResult.html + '\n';
-            }
-          }
-        }
-
-        if (dataSource.ocrResults) {
-          for (const pageResult of dataSource.ocrResults) {
-            if (pageResult.prunedResult) {
-              for (const item of pageResult.prunedResult) {
-                if (item.length >= 2) {
-                  if (typeof item[1] === 'string') {
-                    if (item[1].includes('<table') || item[1].includes('<td')) {
-                      fullText += item[1] + '\n';
-                    } else {
-                      fullText += item[1] + '\n';
-                    }
-                  } else if (typeof item[1] === 'object' && item[1].html) {
-                    fullText += item[1].html + '\n';
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        if (!fullText && dataSource.text) {
-          fullText = dataSource.text;
-        }
-      } else if (typeof result === 'string') {
-        fullText = result;
-      }
-    } catch (error) {
-      console.error('文本提取失败:', error);
-      fullText = JSON.stringify(result);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    fullText = fullText
-      .replace(/\\n/g, '\n')
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'");
-
-    return fullText;
+    return response.json();
   };
 
   // 批量处理文件
-// 批量处理文件 - 修复顺序问题
-const handleProcessFiles = async () => {
-  if (filePreviews.length === 0) {
-    setError('请先选择图片或PDF文件');
-    return;
-  }
+  const handleProcessFiles = async () => {
+    if (filePreviews.length === 0) {
+      setError('请先选择图片或PDF文件');
+      return;
+    }
 
-  setIsLoading(true);
-  setError('');
-  setPropertyData([]);
+    setIsLoading(true);
+    setError('');
+    setPropertyData([]);
 
-  try {
-    const allPropertyData = [];
-    const allApiResponses = [];
-    let allRawText = '';
+    try {
+      const allPropertyData = [];
+      const allApiResponses = [];
+      let allRawText = '';
 
-    // 【重要】按照 filePreviews 的原始顺序处理
-    // 为每个预览项添加原始索引，确保顺序正确
-    const orderedPreviews = filePreviews.map((preview, idx) => ({
-      ...preview,
-      originalIndex: idx
-    }));
+      for (let i = 0; i < filePreviews.length; i++) {
+        const preview = filePreviews[i];
+        setCurrentFileIndex(i);
+        setParseProgress(0);
 
-    for (let i = 0; i < orderedPreviews.length; i++) {
-      const preview = orderedPreviews[i];
-      setCurrentFileIndex(i);
-      setParseProgress(0);
+        const progressInterval = setInterval(() => {
+          setParseProgress(prev => Math.min(prev + 10, 90));
+        }, 200);
 
-      const progressInterval = setInterval(() => {
-        setParseProgress(prev => Math.min(prev + 10, 90));
-      }, 200);
+        let imageBase64;
 
-      let imageBase64;
+        if (preview.type === 'pdf-page' && preview.blob) {
+          imageBase64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(preview.blob);
+          });
+        } else {
+          imageBase64 = preview.url;
+        }
 
-      if (preview.type === 'pdf-page' && preview.blob) {
-        imageBase64 = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(preview.blob);
+        // 调用统一接口
+        const result = await callExtractAPI(imageBase64);
+
+        clearInterval(progressInterval);
+        setParseProgress(100);
+
+        // 保存原始数据用于调试
+        allApiResponses.push({
+          index: i,
+          fileName: preview.name,
+          pageNumber: preview.pageNumber,
+          data: result.data,
+          rawText: result.rawText
         });
-      } else {
-        imageBase64 = preview.url;
+
+        if (allRawText) allRawText += '\n\n---\n\n';
+        allRawText += `【${preview.name} - 第${preview.pageNumber}页】\n${result.rawText || ''}`;
+
+        // 直接使用后端返回的结构化数据
+        if (result.success && result.data) {
+          allPropertyData.push({
+            ...result.data,
+            _index: i,
+            _fileName: preview.name,
+            _pageNumber: preview.pageNumber
+          });
+        }
       }
 
-      const result = await callOCRAPI(imageBase64);
-      
-      // 保存响应时也记录原始顺序
-      allApiResponses.push({
-        originalIndex: preview.originalIndex,
-        fileName: preview.name,
-        pageNumber: preview.pageNumber,
-        response: result
+      setPropertyData(allPropertyData);
+      setDebugData({
+        allRawText: allRawText,
+        allJsonResponse: allApiResponses
       });
+      setActiveTab('table');
 
-      clearInterval(progressInterval);
-      setParseProgress(100);
-
-      let fullText = extractTextFromOCRResult(result);
-
-      if (allRawText) allRawText += '\n\n';
-      allRawText += `【${preview.name} - 第${preview.pageNumber}页】\n${fullText}`;
-
-      const propertyInfo = parsePropertyInfo(fullText, preview.name);
-
-      if (propertyInfo) {
-        // 保存时也记录原始顺序
-        allPropertyData.push({
-          ...propertyInfo,
-          _originalIndex: preview.originalIndex,
-          _pageNumber: preview.pageNumber,
-          _fileName: preview.name
-        });
+      if (allPropertyData.length === 0) {
+        setError('未能提取到有效的房产信息，请检查图片质量');
       }
+    } catch (error) {
+      setError(`处理失败: ${error.message}`);
+      console.error('处理错误:', error);
+    } finally {
+      setIsLoading(false);
+      setParseProgress(0);
     }
-
-    // 【重要】按照原始索引排序，确保显示顺序与上传顺序一致
-    const sortedPropertyData = allPropertyData.sort((a, b) => 
-      a._originalIndex - b._originalIndex
-    );
-    
-    // 移除临时字段，但保留文件名和页码信息用于调试
-    const finalPropertyData = sortedPropertyData.map(item => {
-      const { _originalIndex, _pageNumber, _fileName, ...rest } = item;
-      return {
-        ...rest,
-        _fileName,    // 保留文件名用于调试
-        _pageNumber   // 保留页码用于调试
-      };
-    });
-
-    // 同样对响应数据排序
-    const sortedApiResponses = allApiResponses.sort((a, b) => 
-      a.originalIndex - b.originalIndex
-    );
-
-    setPropertyData(finalPropertyData);
-    setDebugData({
-      allRawText: allRawText,
-      allJsonResponse: sortedApiResponses
-    });
-    setActiveTab('table');
-
-    if (finalPropertyData.length === 0) {
-      setError('未能提取到有效的房产信息，请检查图片质量');
-    }
-  } catch (error) {
-    setError(`处理失败: ${error.message}`);
-    console.error('处理错误:', error);
-  } finally {
-    setIsLoading(false);
-    setParseProgress(0);
-  }
-};
+  };
 
   // 删除预览项
   const removeFile = (index) => {
@@ -346,8 +227,7 @@ const handleProcessFiles = async () => {
 
     const remainingFromSameFile = newPreviews.some(p => p.file === previewToRemove.file);
     if (!remainingFromSameFile) {
-      const newFiles = selectedFiles.filter(f => f !== previewToRemove.file);
-      setSelectedFiles(newFiles);
+      setSelectedFiles(prev => prev.filter(f => f !== previewToRemove.file));
     }
 
     if (newPreviews.length === 0) {
@@ -370,126 +250,222 @@ const handleProcessFiles = async () => {
     }
   };
 
- 
-
   // 下载Excel
-  const handleDownloadExcel = () => {
-    if (propertyData.length === 0) {
+const handleDownloadExcel = () => {
+  if (propertyData.length === 0) {
       setError('没有可导出的数据');
       return;
     }
 
-    // 过滤：产权证号、坐落、权利人、面积 至少有两个有数据
+    // 过滤：产权证号、权利人、坐落 三个都是空或"未提及"的数据直接忽略
     const validData = propertyData.filter(data => {
-      const hasFields = [
-        data.产权证号 && data.产权证号.trim() !== '' && data.产权证号 !== '未识别',
-        data.坐落 && data.坐落.trim() !== '' && data.坐落 !== '未识别',
-        data.权利人 && data.权利人.trim() !== '' && data.权利人 !== '未识别',
-        data.面积 && data.面积.trim() !== '' && data.面积 !== '未识别'
-      ].filter(Boolean).length;
-      return hasFields >= 2;
+      const isEmpty = (val) => !val || val.trim() === '' || val.trim() === '未提及';
+      
+      
+      const locationEmpty = isEmpty(data.坐落);
+      
+      // 三个都为空才忽略，至少有一个有数据就保留
+      return !(locationEmpty);
     });
 
     if (validData.length === 0) {
-      setError('没有符合导出条件的数据（产权证号、坐落、权利人、面积至少需要两个有数据）');
+      setError('没有符合导出条件的数据（产权证号、权利人、坐落至少需要一个有有效数据）');
       return;
     }
 
-    // 定义表头（用途拆分为土地用途和房屋用途）
+    // 定义表头
     const headers = [
-      '产权证号', '权利人', '共有情况', '坐落', '不动产单元号',
-      '权利性质', '土地用途', '房屋用途',
-      '共有宗地面积(㎡)', '房屋建筑面积(㎡)',
-      '使用期限', '房屋结构', '套内面积(㎡)', '所在楼层'
+      '序号',
+      '产权证号', '权利人', '坐落', 
+      '房屋用途', '房屋结构', '房屋建筑面积(㎡)', '套内面积(㎡)', '所在楼层',
+      '土地用途', '共有宗地面积(㎡)', '使用期限'
     ];
 
-    // 构建数据行
-    const rows = validData.map(data => {
-      // 解析面积
-      const { landArea, buildingArea } = parseArea(data.面积 || '');
+    // ========== 工具函数 ==========
+    
+    // 解析用途：拆分为土地用途和房屋用途
+    const parseUsage = (usageText) => {
+      if (!usageText) return { landUse: '', buildingUse: '' };
+      
+      // 去掉括号中的备注，如"城镇住宅用地/成套住宅（底商）"
+      const cleaned = usageText.replace(/[（(][^）)]*[）)]/g, '').trim();
+      
+      if (cleaned.includes('/')) {
+        const parts = cleaned.split('/');
+        return {
+          landUse: parts[0]?.trim() || '',
+          buildingUse: parts[1]?.trim() || ''
+        };
+      }
+      
+      // 如果没有 /，整个作为土地用途
+      return { landUse: cleaned, buildingUse: '' };
+    };
 
+    // 解析面积：拆分为共有宗地面积和房屋建筑面积（只保留数值）
+    const parseArea = (areaText) => {
+      if (!areaText) return { landArea: '', buildingArea: '' };
+      
+      // 清理LaTeX格式
+      let cleaned = areaText
+        .replace(/\$\s*/g, '')
+        .replace(/\\,/g, '')
+        .replace(/\\;/g, '')
+        .replace(/m\s*\^\s*\{2\}\s*/g, '㎡')
+        .replace(/m\s*\^\s*2\b/g, '㎡')
+        .replace(/\^\s*\{2\}\s*/g, '²')
+        .replace(/\\mathrm\{([^}]+)\}/g, '$1')
+        .replace(/\\text\{([^}]+)\}/g, '$1')
+        .replace(/\\+/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      let landArea = '';
+      let buildingArea = '';
+
+      // 提取共有宗地面积数值
+      const landMatch = cleaned.match(/共有宗地面积\s*(\d+\.?\d*)/);
+      if (landMatch) {
+        landArea = parseFloat(landMatch[1]);
+      } else {
+        // 兼容"宗地面积"格式
+        const landMatch2 = cleaned.match(/宗地面积\s*(\d+\.?\d*)/);
+        if (landMatch2) {
+          landArea = parseFloat(landMatch2[1]);
+        }
+      }
+
+      // 提取房屋建筑面积数值
+      const buildingMatch = cleaned.match(/房屋建筑面积\s*(\d+\.?\d*)/);
+      if (buildingMatch) {
+        buildingArea = parseFloat(buildingMatch[1]);
+      } else {
+        // 兼容"建筑面积"格式
+        const buildingMatch2 = cleaned.match(/(?<!宗地)建筑面积\s*(\d+\.?\d*)/);
+        if (buildingMatch2) {
+          buildingArea = parseFloat(buildingMatch2[1]);
+        }
+      }
+
+      return { landArea, buildingArea };
+    };
+
+    // 解析使用期限：只提取日期部分
+    const parseDate = (dateText) => {
+      if (!dateText) return '';
+
+      // 匹配各种日期格式
+      const patterns = [
+        /(\d{4})年(\d{1,2})月(\d{1,2})日/,   // 2054年03月09日
+        /(\d{4})-(\d{1,2})-(\d{1,2})/,        // 2054-03-09
+        /(\d{4})\/(\d{1,2})\/(\d{1,2})/       // 2054/03/09
+      ];
+
+      for (const pattern of patterns) {
+        const match = dateText.match(pattern);
+        if (match) {
+          const year = match[1];
+          const month = match[2].padStart(2, '0');
+          const day = match[3].padStart(2, '0');
+          return `${year}年${month}月${day}日`;
+        }
+      }
+
+      // 如果只有年份
+      const yearMatch = dateText.match(/(\d{4})年/);
+      if (yearMatch) {
+        return `${yearMatch[1]}年`;
+      }
+
+      return dateText;
+    };
+
+    // 解析套内面积：只提取数值
+    const parseInnerArea = (innerAreaText) => {
+      if (!innerAreaText) return '';
+
+      const numMatch = innerAreaText.match(/(\d+\.?\d*)/);
+      if (numMatch) {
+        return parseFloat(numMatch[1]);
+      }
+
+      return '';
+    };
+
+    // ========== 构建数据行 ==========
+    const rows = validData.map((data, index) => {
       // 解析用途
       const { landUse, buildingUse } = parseUsage(data.用途 || '');
-
-      // 解析使用期限（只提取日期）
+      
+      // 解析面积
+      const { landArea, buildingArea } = parseArea(data.面积 || '');
+      
+      // 解析使用期限
       const deadline = parseDate(data.使用期限 || '');
-
-      // 解析套内面积（只提取数字）
+      
+      // 解析套内面积
       const innerArea = parseInnerArea(data.套内面积 || '');
 
       return [
+        index + 1,            // 序号
         data.产权证号 || '',
         data.权利人 || '',
-        data.共有情况 || '',
         data.坐落 || '',
-        data.不动产单元号 || '',
-        data.权利性质 || '',
-        landUse,         // 土地用途
-        buildingUse,     // 房屋用途
-        landArea,        // 数字类型
-        buildingArea,    // 数字类型
-        deadline,        // 日期类型
+        buildingUse,          // 房屋用途
         data.房屋结构 || '',
-        innerArea,       // 数字类型
-        data.所在楼层 || ''
+        buildingArea,         // 房屋建筑面积（数字）
+        innerArea,            // 套内面积（数字）
+        data.所在楼层 || '',
+        landUse,              // 土地用途
+        landArea,             // 共有宗地面积（数字）
+        deadline              // 使用期限（只保留日期）
       ];
     });
 
     // 创建工作簿
     const wb = XLSX.utils.book_new();
-
-    // 将数据转为 worksheet
     const worksheetData = [headers, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(worksheetData);
 
     // 设置列宽
     ws['!cols'] = [
+      { wch: 6 },   // 序号
       { wch: 35 },  // 产权证号
-      { wch: 20 },  // 权利人
-      { wch: 15 },  // 共有情况
-      { wch: 40 },  // 坐落
-      { wch: 30 },  // 不动产单元号
-      { wch: 10 },  // 权利性质
-      { wch: 18 },  // 土地用途
+      { wch: 15 },  // 权利人
+      { wch: 45 },  // 坐落
       { wch: 18 },  // 房屋用途
-      { wch: 16 },  // 共有宗地面积(㎡)
-      { wch: 16 },  // 房屋建筑面积(㎡)
-      { wch: 20 },  // 使用期限
       { wch: 15 },  // 房屋结构
-      { wch: 14 },  // 套内面积(㎡)
+      { wch: 18 },  // 房屋建筑面积(㎡)
+      { wch: 15 },  // 套内面积(㎡)
       { wch: 15 },  // 所在楼层
+      { wch: 18 },  // 土地用途
+      { wch: 18 },  // 共有宗地面积(㎡)
+      { wch: 22 },  // 使用期限
     ];
 
-    // 设置单元格类型和数据格式
+    // ========== 设置单元格类型和数据格式 ==========
     for (let i = 0; i < rows.length; i++) {
       const rowIndex = i + 1; // 数据行索引（跳过表头）
 
-      // 共有宗地面积（第 9 列，索引 8）- 数字类型
-      const landCell = XLSX.utils.encode_cell({ r: rowIndex, c: 8 });
-      if (ws[landCell] && rows[i][8] !== '') {
-        ws[landCell].t = 'n';
-        ws[landCell].z = '#,##0.00';
+      // 房屋建筑面积（第7列，索引6）- 数字类型，保留2位小数
+      const buildingCell = XLSX.utils.encode_cell({ r: rowIndex, c: 6 });
+      if (ws[buildingCell] && rows[i][6] !== '') {
+        ws[buildingCell].t = 'n';           // 数字类型
+        ws[buildingCell].z = '#,##0.00';    // 格式：千分位+2位小数
       }
 
-      // 房屋建筑面积（第 10 列，索引 9）- 数字类型
-      const buildingCell = XLSX.utils.encode_cell({ r: rowIndex, c: 9 });
-      if (ws[buildingCell] && rows[i][9] !== '') {
-        ws[buildingCell].t = 'n';
-        ws[buildingCell].z = '#,##0.00';
-      }
-
-      // 使用期限（第 11 列，索引 10）- 日期类型
-      const dateCell = XLSX.utils.encode_cell({ r: rowIndex, c: 10 });
-      if (ws[dateCell] && rows[i][10] !== '') {
-        ws[dateCell].t = 'd';
-        ws[dateCell].z = 'yyyy-mm-dd';
-      }
-
-      // 套内面积（第 13 列，索引 12）- 数字类型
-      const innerCell = XLSX.utils.encode_cell({ r: rowIndex, c: 12 });
-      if (ws[innerCell] && rows[i][12] !== '') {
+      // 套内面积（第8列，索引7）- 数字类型，保留2位小数
+      const innerCell = XLSX.utils.encode_cell({ r: rowIndex, c: 7 });
+      if (ws[innerCell] && rows[i][7] !== '') {
         ws[innerCell].t = 'n';
         ws[innerCell].z = '#,##0.00';
+      }
+
+      // 共有宗地面积（第11列，索引10）- 数字类型，保留2位小数
+      const landCell = XLSX.utils.encode_cell({ r: rowIndex, c: 10 });
+      if (ws[landCell] && rows[i][10] !== '') {
+        ws[landCell].t = 'n';
+        ws[landCell].z = '#,##0.00';
       }
     }
 
@@ -501,93 +477,6 @@ const handleProcessFiles = async () => {
 
     XLSX.writeFile(wb, fileName);
   };
-
-  // 解析用途：拆分为土地用途和房屋用途
-  function parseUsage(usageText) {
-    let landUse = '';
-    let buildingUse = '';
-
-    if (!usageText) return { landUse: '', buildingUse: '' };
-
-    // 用 / 分割
-    if (usageText.includes('/')) {
-      const parts = usageText.split('/');
-      landUse = parts[0]?.trim() || '';
-      buildingUse = parts[1]?.trim() || '';
-    } else {
-      // 如果没有 /，整个作为土地用途
-      landUse = usageText.trim();
-    }
-
-    return { landUse, buildingUse };
-  }
-
-  // 解析面积：拆分为共有宗地面积和房屋建筑面积（只保留数值）
-  function parseArea(areaText) {
-    let landArea = '';
-    let buildingArea = '';
-
-    if (!areaText) return { landArea: '', buildingArea: '' };
-
-    // 提取共有宗地面积数值
-    const landMatch = areaText.match(/共有宗地面积\s*(\d+\.?\d*)/);
-    if (landMatch) {
-      landArea = parseFloat(landMatch[1]);
-    }
-
-    // 提取房屋建筑面积数值
-    const buildingMatch = areaText.match(/房屋建筑面积\s*(\d+\.?\d*)/);
-    if (buildingMatch) {
-      buildingArea = parseFloat(buildingMatch[1]);
-    }
-
-    return { landArea, buildingArea };
-  }
-
-  // 解析使用期限：只提取日期部分
-function parseDate(dateText) {
-    if (!dateText) return '';
-
-    // 更灵活的匹配：提取任意位置的日期格式
-    const patterns = [
-      /(\d{4})年(\d{1,2})月(\d{1,2})日/,  // 2059年05月17日
-      /(\d{4})-(\d{1,2})-(\d{1,2})/,      // 2059-05-17
-      /(\d{4})\/(\d{1,2})\/(\d{1,2})/     // 2059/05/17
-    ];
-
-    for (const pattern of patterns) {
-      const match = dateText.match(pattern);
-      if (match) {
-        const year = match[1];
-        const month = match[2].padStart(2, '0');
-        const day = match[3].padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-    }
-
-    // 如果只有年份
-    const yearMatch = dateText.match(/(\d{4})年/);
-    if (yearMatch) {
-      return `${yearMatch[1]}-01-01`;
-    }
-
-    return dateText;
-}
-
-  // 解析套内面积：只提取数值
-  function parseInnerArea(innerAreaText) {
-    if (!innerAreaText) return '';
-
-    // 提取数字部分
-    const numMatch = innerAreaText.match(/(\d+\.?\d*)/);
-    if (numMatch) {
-      return parseFloat(numMatch[1]);
-    }
-
-    return innerAreaText;
-  }
-
-
   // 复制文本
   const handleCopyText = (text) => {
     if (text) {
@@ -598,21 +487,9 @@ function parseDate(dateText) {
   };
 
   // 拖拽处理
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    handleFileSelect(e.dataTransfer.files);
-  };
+  const handleDragOver = (e) => { e.preventDefault(); setDragOver(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); setDragOver(false); };
+  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); handleFileSelect(e.dataTransfer.files); };
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
@@ -625,26 +502,20 @@ function parseDate(dateText) {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        {/* 左侧面板 - 文件上传 */}
+        {/* 左侧面板 */}
         <div className={styles.leftPanel}>
           <div className={styles.panelHeader}>
             <h3>文件上传</h3>
             <div className={styles.headerActions}>
               {filePreviews.length > 0 && (
-                <button onClick={handleReset} className={styles.resetBtn}>
-                  重置
-                </button>
+                <button onClick={handleReset} className={styles.resetBtn}>重置</button>
               )}
               {propertyData.length > 0 && (
-                <button onClick={handleDownloadExcel} className={styles.downloadBtn}>
-                  📥
-                  {/* 下载表格 */}
-                </button>
+                <button onClick={handleDownloadExcel} className={styles.downloadBtn}>📥</button>
               )}
             </div>
           </div>
 
-          {/* 上传区域 - 没有文件时显示 */}
           {filePreviews.length === 0 && (
             <div
               className={`${styles.uploadArea} ${dragOver ? styles.dragOver : ''}`}
@@ -667,7 +538,6 @@ function parseDate(dateText) {
             </div>
           )}
 
-          {/* 处理按钮 */}
           {filePreviews.length > 0 && (
             <button
               onClick={handleProcessFiles}
@@ -678,20 +548,15 @@ function parseDate(dateText) {
             </button>
           )}
 
-          {/* 加载进度 */}
           {isLoading && (
             <div className={styles.progressSection}>
               <div className={styles.progressBar}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${parseProgress}%` }}
-                ></div>
+                <div className={styles.progressFill} style={{ width: `${parseProgress}%` }}></div>
               </div>
               <p>正在处理第 {currentFileIndex + 1}/{filePreviews.length} 页</p>
             </div>
           )}
 
-          {/* 文件预览列表 */}
           {filePreviews.length > 0 && (
             <div className={styles.previewList}>
               <div className={styles.previewListHeader}>
@@ -703,67 +568,33 @@ function parseDate(dateText) {
                     <div className={styles.previewHeader}>
                       <span className={styles.pageBadge}>第{preview.pageNumber}页</span>
                       <span className={styles.previewName}>{preview.name}</span>
-                      <button
-                        onClick={() => removeFile(index)}
-                        className={styles.removeBtn}
-                      >
-                        ×
-                      </button>
+                      <button onClick={() => removeFile(index)} className={styles.removeBtn}>×</button>
                     </div>
                     <div className={styles.previewImageWrapper}>
-                      <img
-                        src={preview.url}
-                        alt={preview.name}
-                        className={styles.previewImage}
-                      />
+                      <img src={preview.url} alt={preview.name} className={styles.previewImage} />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* 文件信息 */}
-          {selectedFiles.length > 0 && (
-            <div className={styles.fileInfo}>
-              <p>已选择 {selectedFiles.length} 个文件</p>
-              <p>总大小：{(selectedFiles.reduce((sum, f) => sum + f.size, 0) / 1024).toFixed(2)} KB</p>
-            </div>
-          )}
         </div>
 
-        {/* 右侧面板 - 识别结果 */}
+        {/* 右侧面板 */}
         <div className={styles.rightPanel}>
           <div className={styles.panelHeader}>
             <h3>识别结果</h3>
           </div>
 
-          {/* Tab 切换栏 */}
           {propertyData.length > 0 && (
             <div className={styles.tabBar}>
-              <button
-                className={`${styles.tabButton} ${activeTab === 'table' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('table')}
-              >
-                📋 文档解析
-              </button>
-              <button
-                className={`${styles.tabButton} ${activeTab === 'raw' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('raw')}
-              >
-                📄 原始文本
-              </button>
-              <button
-                className={`${styles.tabButton} ${activeTab === 'json' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('json')}
-              >
-                📡 JSON响应
-              </button>
+              <button className={`${styles.tabButton} ${activeTab === 'table' ? styles.activeTab : ''}`} onClick={() => setActiveTab('table')}>📋 文档解析</button>
+              <button className={`${styles.tabButton} ${activeTab === 'raw' ? styles.activeTab : ''}`} onClick={() => setActiveTab('raw')}>📄 原始文本</button>
+              <button className={`${styles.tabButton} ${activeTab === 'json' ? styles.activeTab : ''}`} onClick={() => setActiveTab('json')}>📡 JSON响应</button>
             </div>
           )}
 
           <div className={styles.resultContent}>
-            {/* 加载状态 */}
             {isLoading && (
               <div className={styles.loadingContainer}>
                 <div className={styles.spinner}></div>
@@ -771,7 +602,6 @@ function parseDate(dateText) {
               </div>
             )}
 
-            {/* 错误提示 */}
             {error && (
               <div className={styles.errorToast}>
                 <span>⚠️ {error}</span>
@@ -779,52 +609,33 @@ function parseDate(dateText) {
               </div>
             )}
 
-            {/* 文档解析 - 表格视图 */}
             {!isLoading && activeTab === 'table' && propertyData.length > 0 && (
               <>
                 <PropertyTable data={propertyData} />
                 <div className={styles.statistics}>
                   <span>共识别 {propertyData.length} 条记录</span>
-                  <span>识别时间: {new Date().toLocaleString()}</span>
                 </div>
               </>
             )}
 
-            {/* 原始文本 */}
             {!isLoading && activeTab === 'raw' && (
               <div className={styles.rawTextView}>
                 <div className={styles.rawTextHeader}>
-                  <button
-                    onClick={() => handleCopyText(debugData.allRawText)}
-                    className={styles.copyBtn}
-                  >
-                    复制全部
-                  </button>
+                  <button onClick={() => handleCopyText(debugData.allRawText)} className={styles.copyBtn}>复制全部</button>
                 </div>
-                <pre className={styles.rawTextContent}>
-                  {debugData.allRawText || '暂无原始文本'}
-                </pre>
+                <pre className={styles.rawTextContent}>{debugData.allRawText || '暂无原始文本'}</pre>
               </div>
             )}
 
-            {/* JSON响应 */}
             {!isLoading && activeTab === 'json' && (
               <div className={styles.jsonView}>
                 <div className={styles.jsonHeader}>
-                  <button
-                    onClick={() => handleCopyText(JSON.stringify(debugData.allJsonResponse, null, 2))}
-                    className={styles.copyBtn}
-                  >
-                    复制全部
-                  </button>
+                  <button onClick={() => handleCopyText(JSON.stringify(debugData.allJsonResponse, null, 2))} className={styles.copyBtn}>复制全部</button>
                 </div>
-                <pre className={styles.jsonContent}>
-                  {JSON.stringify(debugData.allJsonResponse, null, 2)}
-                </pre>
+                <pre className={styles.jsonContent}>{JSON.stringify(debugData.allJsonResponse, null, 2)}</pre>
               </div>
             )}
 
-            {/* 空状态 */}
             {!isLoading && propertyData.length === 0 && !error && (
               <div className={styles.emptyState}>
                 <div className={styles.emptyIcon}>📄</div>
