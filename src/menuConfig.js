@@ -99,8 +99,13 @@ export const menuItems = [
     icon: <SettingOutlined />,
     label: '文生图',
     component: lazy(() => import('./pages/TextToImage')),
+  },
+  {
+    key: '/TextBox',
+    icon: <SettingOutlined />,
+    label: '输入框',
+    component: lazy(() => import('./pages/TextBox')),
   }
- 
   
 ];
 

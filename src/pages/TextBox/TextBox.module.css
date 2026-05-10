@@ -1,0 +1,109 @@
+/* TextBox.module.css */
+
+/* 整个组件的容器 */
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 300px; /* 可根据需求调整宽度 */
+  font-family: sans-serif;
+}
+
+/* 左侧 Label 标签样式 */
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+}
+
+/* 输入框外层包裹器，用于定位左右图标 */
+.inputWrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* 实际的原生输入框 */
+.input {
+  width: 100%;
+  padding: 10px 70px 10px 40px; /* 左留空给左图标，右留空给右图标 */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #007bff;
+}
+
+/* 左右图标的通用样式 */
+.icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none; /* 让点击穿透图标 */
+}
+
+/* 左侧图标定位 */
+.leftIcon {
+  left: 12px;
+}
+
+/* 右侧图标定位 */
+.rightIcon {
+  right: 12px;
+  pointer-events: auto; /* 右侧图标（如清空按钮）可能需要点击 */
+  cursor: pointer;
+}
+
+/* 下拉搜索面板 */
+.dropdownPanel {
+  position: absolute;
+  top: calc(100% + 8px); /* 显示在输入框正下方 */
+  left: 80px; /* 避开左侧 Label 的宽度 */
+  width: 220px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  z-index: 1000;
+}
+
+/* 下拉框内的搜索框 */
+.dropdownSearchInput {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* 搜索结果列表 */
+.resultList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.resultItem {
+  padding: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.resultItem:hover {
+  background-color: #f0f7ff;
+  color: #007bff;
+}

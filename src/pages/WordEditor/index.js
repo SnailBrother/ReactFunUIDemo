@@ -68,17 +68,7 @@ const WordEditor = () => {
     return paragraphs.filter(p => p !== '');
   };
 
-  const execCommand = useCallback((command, value = null) => {
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
-  }, []);
-
-  const insertLink = useCallback(() => {
-    const url = prompt('请输入链接地址：', 'https://');
-    if (url) {
-      document.execCommand('createLink', false, url);
-    }
-  }, []);
+ 
 
   const generateWord = async () => {
     setLoading(true);
@@ -153,27 +143,14 @@ const WordEditor = () => {
     }
   };
 
-  const insertExample = () => {
-    const exampleHtml = `
-      <p>估价对象1 - 这是第一段内容的详细描述</p>
-      <p>估价对象2 - 这是第二段内容的详细描述</p>
-      <p>估价对象3 - 这是第三段内容的详细描述</p>
-      <p>估价对象4 - 这是第四段内容的详细描述</p>
-    `;
-    
-    setEditorContent(exampleHtml);
-    if (editorRef.current) {
-      editorRef.current.innerHTML = exampleHtml;
-    }
-  };
-
-  const paragraphs = extractParagraphs(editorContent);
+ 
+ 
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>📝 Word文档编辑器</h1>
-        <p className={styles.subtitle}>填写表单内容，一键生成Word文档</p>
+        
       </div>
 
       <div className={styles.formContainer}>
@@ -237,117 +214,10 @@ const WordEditor = () => {
               主要内容
               <span className={styles.required}>*</span>
             </label>
-            <button
-              type="button"
-              onClick={insertExample}
-              className={styles.exampleButton}
-            >
-              📋 插入示例
-            </button>
+           
           </div>
           
-          <div className={styles.toolbar}>
-            <button 
-              type="button" 
-              onClick={() => execCommand('bold')}
-              className={styles.toolbarButton}
-              title="加粗"
-            >
-              <strong>B</strong>
-            </button>
-            <button 
-              type="button" 
-              onClick={() => execCommand('italic')}
-              className={styles.toolbarButton}
-              title="斜体"
-            >
-              <em>I</em>
-            </button>
-            <button 
-              type="button" 
-              onClick={() => execCommand('underline')}
-              className={styles.toolbarButton}
-              title="下划线"
-            >
-              <u>U</u>
-            </button>
-            <button 
-              type="button" 
-              onClick={() => execCommand('strikeThrough')}
-              className={styles.toolbarButton}
-              title="删除线"
-            >
-              <s>S</s>
-            </button>
-            
-            <span className={styles.toolbarDivider}></span>
-            
-            <button 
-              type="button" 
-              onClick={() => execCommand('justifyLeft')}
-              className={styles.toolbarButton}
-              title="左对齐"
-            >
-              ⬅️
-            </button>
-            <button 
-              type="button" 
-              onClick={() => execCommand('justifyCenter')}
-              className={styles.toolbarButton}
-              title="居中"
-            >
-              ⬆️
-            </button>
-            <button 
-              type="button" 
-              onClick={() => execCommand('justifyRight')}
-              className={styles.toolbarButton}
-              title="右对齐"
-            >
-              ➡️
-            </button>
-            
-            <span className={styles.toolbarDivider}></span>
-            
-            <button 
-              type="button" 
-              onClick={() => execCommand('insertUnorderedList')}
-              className={styles.toolbarButton}
-              title="无序列表"
-            >
-              • 列表
-            </button>
-            <button 
-              type="button" 
-              onClick={() => execCommand('insertOrderedList')}
-              className={styles.toolbarButton}
-              title="有序列表"
-            >
-              1. 列表
-            </button>
-            
-            <span className={styles.toolbarDivider}></span>
-            
-            <button 
-              type="button" 
-              onClick={insertLink}
-              className={styles.toolbarButton}
-              title="插入链接"
-            >
-              🔗 链接
-            </button>
-            
-            <span className={styles.toolbarDivider}></span>
-            
-            <button 
-              type="button" 
-              onClick={() => execCommand('removeFormat')}
-              className={styles.toolbarButton}
-              title="清除格式"
-            >
-              🧹 清除
-            </button>
-          </div>
+ 
           
           <div
             ref={editorRef}
@@ -364,20 +234,7 @@ const WordEditor = () => {
           </span>
         </div>
 
-        {paragraphs.length > 0 && (
-          <div className={styles.previewSection}>
-            <h3 className={styles.previewTitle}>📄 段落预览（共 {paragraphs.length} 段）</h3>
-            <div className={styles.paragraphList}>
-              {paragraphs.map((para, index) => (
-                <div key={index} className={styles.paragraphItem}>
-                  <span className={styles.paragraphNumber}>{index + 1}.</span>
-                  <span className={styles.paragraphText}>{para}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
+        
         <div className={styles.buttonGroup}>
           <button
             onClick={generateWord}
