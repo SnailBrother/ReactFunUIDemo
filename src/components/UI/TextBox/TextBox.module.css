@@ -3,13 +3,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 20px;
 }
 
 .label {
   font-size: 14px;
   color: #333;
   white-space: nowrap;
-  min-width: 60px;
+  min-width: 80px;
 }
 
 .inputWrapper {
@@ -51,8 +52,8 @@
 
 .dropdownPanel {
   position: absolute;
-  top: 100%;
-  left: 65px;
+  top: 80%;
+  left: 80px;
   /* 这个要修改相对输入框 */
   right: 0;
   margin-top: 4px;
@@ -98,3 +99,333 @@
 .resultItem:hover {
   background-color: #f5f5f5;
 }
+.icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.rightIcon {
+  cursor: pointer;
+  color: #999;
+  transition: color 0.3s;
+}
+
+.rightIcon:hover {
+  color: #333;
+}
+/* 原有样式保持不变，添加以下样式 */
+
+/* NumberInput 样式 */
+.numberInput {
+  padding-right: 70px !important;
+}
+
+.numberControls {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 2;
+}
+
+.numberBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 14px;
+  border: 0px solid #d9d9d9;
+  background: #fafafa00;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 2px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.numberBtn:hover {
+  border-color: #4096ff;
+  background: #e6f4ff;
+}
+
+.numberBtn:active {
+  background: #bae0ff;
+}
+
+.numberIcon {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  color: #666;
+}
+
+.numberBtn:hover .numberIcon {
+  color: #4096ff;
+}
+
+/* #region start 日期样式*/
+ 
+ 
+.datePickerPanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  width: 280px;
+  padding: 12px;
+}
+
+.dateHeaderBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.dateNavBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.dateNavBtn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.dateTitleGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.dateClickableTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.dateClickableTitle:hover {
+  background: #f0f0f0;
+}
+
+.dateNormalTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.datePanelBody {
+  /* 面板内容区域 */
+}
+
+.dateWeekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8px;
+}
+
+.dateWeekday {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  padding: 4px 0;
+  font-weight: 500;
+}
+
+.dateDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dateDayCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.dateDayCell:hover {
+  background: #f0f0f0;
+}
+
+.dateOtherMonth {
+  color: #ccc;
+  cursor: default;
+}
+
+.dateOtherMonth:hover {
+  background: transparent;
+}
+
+.dateSelected {
+  background: #4096ff;
+  color: #fff;
+}
+
+.dateSelected:hover {
+  background: #4096ff;
+}
+
+.dateToday {
+  border: 1px solid #4096ff;
+}
+
+.dateSelected.dateToday {
+  border-color: #4096ff;
+}
+
+.dateFooter {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.dateTodayBtn {
+  padding: 4px 16px;
+  font-size: 13px;
+  color: #4096ff;
+  background: transparent;
+  border: 1px solid #4096ff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dateTodayBtn:hover {
+  background: #e6f4ff;
+}
+
+.dateMonthGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px;
+}
+
+.dateMonthCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.dateMonthCell:hover {
+  background: #f0f0f0;
+}
+
+.dateActive {
+  background: #4096ff;
+  color: #fff;
+}
+
+.dateActive:hover {
+  background: #4096ff;
+}
+
+.dateYearGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px;
+}
+
+.dateYearCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.dateYearCell:hover {
+  background: #f0f0f0;
+}
+
+.dateOutOfDecade {
+  color: #ccc;
+  cursor: default;
+}
+
+.dateOutOfDecade:hover {
+  background: transparent;
+}
+/*  #endregion end */
+/* #region start ComboBox相关的样式*/
+/* ComboBox 复选框样式 */
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.itemText {
+  flex: 1;
+}
+
+.selectedItem {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+/* 当 input 为只读时的样式 */
+.input[readonly] {
+  cursor: pointer;
+  background-color: #ffffff; 
+}
+/*  #endregion end */

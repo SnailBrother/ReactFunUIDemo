@@ -1,0 +1,170 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+}
+
+.label {
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.icon {
+  position: absolute;
+  left: 12px;
+  color: #999;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.rightIcon {
+  left: auto;
+  right: 12px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 40px 8px 40px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.input:focus {
+  border-color: #4096ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.dropdownPanel {
+  position: absolute;
+  top: 80%;
+  left: 80px;
+  /* 这个要修改相对输入框 */
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  padding: 8px;
+}
+
+.dropdownSearchInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.dropdownSearchInput:focus {
+  border-color: #4096ff;
+}
+
+.resultList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.resultItem {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.resultItem:hover {
+  background-color: #f5f5f5;
+}
+.icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.rightIcon {
+  cursor: pointer;
+  color: #999;
+  transition: color 0.3s;
+}
+
+.rightIcon:hover {
+  color: #333;
+}
+/* 原有样式保持不变，添加以下样式 */
+
+/* NumberInput 样式 */
+.numberInput {
+  padding-right: 70px !important;
+}
+
+.numberControls {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 2;
+}
+
+.numberBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 14px;
+  border: 0px solid #d9d9d9;
+  background: #fafafa00;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 2px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.numberBtn:hover {
+  border-color: #4096ff;
+  background: #e6f4ff;
+}
+
+.numberBtn:active {
+  background: #bae0ff;
+}
+
+.numberIcon {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  color: #666;
+}
+
+.numberBtn:hover .numberIcon {
+  color: #4096ff;
+}

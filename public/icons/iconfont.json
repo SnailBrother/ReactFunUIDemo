@@ -1,0 +1,114 @@
+{
+  "id": "5174885",
+  "name": "Applicable",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "17868595",
+      "name": "搜索",
+      "font_class": "search",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "5746191",
+      "name": "编辑",
+      "font_class": "edit",
+      "unicode": "e627",
+      "unicode_decimal": 58919
+    },
+    {
+      "icon_id": "42548336",
+      "name": "不可编辑",
+      "font_class": "unedit",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    },
+    {
+      "icon_id": "980988",
+      "name": "不通过",
+      "font_class": "weibiaoti522",
+      "unicode": "e706",
+      "unicode_decimal": 59142
+    },
+    {
+      "icon_id": "5387571",
+      "name": "箭头_列表向右",
+      "font_class": "arrow-right",
+      "unicode": "eb03",
+      "unicode_decimal": 60163
+    },
+    {
+      "icon_id": "5387573",
+      "name": "箭头_列表收起",
+      "font_class": "arrow-up",
+      "unicode": "eb04",
+      "unicode_decimal": 60164
+    },
+    {
+      "icon_id": "5387574",
+      "name": "箭头_列表向左",
+      "font_class": "arrow-left",
+      "unicode": "eb05",
+      "unicode_decimal": 60165
+    },
+    {
+      "icon_id": "5387576",
+      "name": "箭头_列表展开",
+      "font_class": "arrow-down",
+      "unicode": "eb06",
+      "unicode_decimal": 60166
+    },
+    {
+      "icon_id": "8017099",
+      "name": "关闭",
+      "font_class": "guanbi2",
+      "unicode": "e7ee",
+      "unicode_decimal": 59374
+    },
+    {
+      "icon_id": "8842617",
+      "name": "日历",
+      "font_class": "calendar",
+      "unicode": "eb5e",
+      "unicode_decimal": 60254
+    },
+    {
+      "icon_id": "11385673",
+      "name": "关闭",
+      "font_class": "clear",
+      "unicode": "e7f5",
+      "unicode_decimal": 59381
+    },
+    {
+      "icon_id": "12108848",
+      "name": "没有数据",
+      "font_class": "meiyoushuju11",
+      "unicode": "ea5b",
+      "unicode_decimal": 59995
+    },
+    {
+      "icon_id": "36674197",
+      "name": "对错=错",
+      "font_class": "wrong",
+      "unicode": "eae4",
+      "unicode_decimal": 60132
+    },
+    {
+      "icon_id": "36674208",
+      "name": "对错=对",
+      "font_class": "right",
+      "unicode": "eae5",
+      "unicode_decimal": 60133
+    },
+    {
+      "icon_id": "47453588",
+      "name": "243_日历",
+      "font_class": "a-243_rili",
+      "unicode": "eb61",
+      "unicode_decimal": 60257
+    }
+  ]
+}
