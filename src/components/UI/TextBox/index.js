@@ -18,34 +18,52 @@ const TextBox = ({
   step = 1,
   placeholder,
   dateFormat = 'YYYY-MM-DD',
-  // ComboBox 新增属性
-  editable = true,        // 是否可自由编辑输入
-  multiple = false,       // 是否多选
-  connector = '、',       // 多选连接符号
-  
+  editable = true,
+  multiple = false,
+  connector = '、',
+  trueLabel = "是",
+  falseLabel = "否",
 }) => {
-  const [inputValue, setInputValue] = useState(value || '');
+  const [inputValue, setInputValue] = useState(() => {
+    if (Type === "Switch") {
+      if (value === true) return trueLabel;
+      if (value === false) return falseLabel;
+      return '';
+    }
+    return value || '';
+  });
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef(null);
+  const inputWrapperRef = useRef(null); // 新增：用于定位下拉面板
   const defaultPlaceholder = placeholder || (
     Type === "DatePicker" ? "请选择日期" :
       Type === "NumberInput" ? "请输入数字" :
         Type === "ComboBox" ? "请选择或输入..." :
-          "请输入内容..."
+          Type === "Switch" ? "请选择..." :
+            "请输入内容..."
   );
   const inputRef = useRef(null);
 
   // ComboBox 多选相关状态
   const [selectedItems, setSelectedItems] = useState(() => {
     if (value && multiple) {
-      // 如果传入的value是字符串，尝试按连接符分割
       if (typeof value === 'string') {
         return value.split(connector).map(s => s.trim()).filter(s => s);
       }
       return Array.isArray(value) ? value : [];
     }
     return [];
+  });
+
+  // Switch 模式内部状态
+  const [switchValue, setSwitchValue] = useState(() => {
+    if (Type === "Switch") {
+      if (value === true) return true;
+      if (value === false) return false;
+      return null;
+    }
+    return null;
   });
 
   // 同步外部 value
@@ -60,6 +78,17 @@ const TextBox = ({
           setSelectedItems(value);
           setInputValue(value.join(connector));
         }
+      } else if (Type === "Switch") {
+        if (value === true) {
+          setInputValue(trueLabel);
+          setSwitchValue(true);
+        } else if (value === false) {
+          setInputValue(falseLabel);
+          setSwitchValue(false);
+        } else {
+          setInputValue('');
+          setSwitchValue(null);
+        }
       } else if (value !== inputValue) {
         setInputValue(value);
       }
@@ -67,7 +96,7 @@ const TextBox = ({
     if (Type === "DatePicker" && value) {
       setTempDate(parseDate(value));
     }
-  }, [value, Type, multiple, connector]);
+  }, [value, Type, multiple, connector, trueLabel, falseLabel]);
 
   // 日期选择器相关状态
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -231,17 +260,16 @@ const TextBox = ({
       setInputValue(val);
       onChange && onChange(val === '' ? '' : Number(val));
     } else if (Type === "ComboBox") {
-      if (!editable) return; // 不可编辑时不处理
+      if (!editable) return;
       setInputValue(val);
-      
-      // 单选模式下，清空选中的项
       if (!multiple) {
         setSelectedItems([]);
         onChange?.(val);
       } else {
-        // 多选模式下，如果用户手动编辑输入框，我们不同步到选中项，直到用户选择选项
         onChange?.(val);
       }
+    } else if (Type === "Switch") {
+      return;
     } else {
       setInputValue(val);
       onChange && onChange(val);
@@ -250,11 +278,17 @@ const TextBox = ({
 
   // 清空输入框
   const handleClear = () => {
-    setInputValue('');
-    if (Type === "ComboBox" && multiple) {
-      setSelectedItems([]);
+    if (Type === "Switch") {
+      setInputValue('');
+      setSwitchValue(null);
+      onChange?.(null);
+    } else {
+      setInputValue('');
+      if (Type === "ComboBox" && multiple) {
+        setSelectedItems([]);
+      }
+      onChange && onChange(multiple ? [] : '');
     }
-    onChange && onChange(multiple ? [] : '');
     inputRef.current?.focus();
   };
 
@@ -278,43 +312,46 @@ const TextBox = ({
   };
 
   // 输入框获得焦点时显示下拉
-  const handleInputFocus = () => {
-    if (Type === "SearchBox" || Type === "ComboBox") {
-      setIsDropdownVisible(true);
-    }
-  };
+const handleInputFocus = () => {
+  if (Type === "SearchBox" || Type === "ComboBox" || Type === "Switch") {
+    setIsDropdownVisible(true);
+  }
+  // DatePicker 不在这里处理，由 handleDatePickerClick 处理
+};
 
   // 点击输入框区域（DatePicker 模式）
-  const handleDatePickerClick = () => {
-    if (Type === "DatePicker") {
-      setIsDatePickerOpen(!isDatePickerOpen);
-      setViewMode('day');
-    }
+const handleDatePickerClick = () => {
+  if (Type === "DatePicker") {
+    setIsDatePickerOpen(!isDatePickerOpen);
+    setViewMode('day');
+    // 确保关闭其他下拉面板
+    setIsDropdownVisible(false);
+  }
+};
+
+  // Switch 模式：选择 true/false
+  const handleSwitchSelect = (newValue) => {
+    const displayText = newValue === true ? trueLabel : falseLabel;
+    setInputValue(displayText);
+    setSwitchValue(newValue);
+    onChange?.(newValue);
+    setIsDropdownVisible(false);
   };
 
   // 处理 ComboBox 选项的勾选
   const handleCheckboxChange = (item, isChecked) => {
     let newSelectedItems;
     if (isChecked) {
-      // 添加选项
       newSelectedItems = [...selectedItems, item];
     } else {
-      // 移除选项
       newSelectedItems = selectedItems.filter(selected => selected !== item);
     }
     
     setSelectedItems(newSelectedItems);
-    
-    // 构建显示文本
     const displayValue = newSelectedItems.join(connector);
     setInputValue(displayValue);
     
-    // 回调函数返回数组或字符串
-    if (multiple) {
-      onChange?.(newSelectedItems);
-    } else {
-      onChange?.(displayValue);
-    }
+    onChange?.(multiple ? newSelectedItems : displayValue);
   };
 
   // 处理单选模式下的选项选择
@@ -374,13 +411,41 @@ const TextBox = ({
     }
   };
 
+  // 渲染 Switch 下拉面板
+  const renderSwitchPanel = () => {
+    if (Type !== "Switch" || !isDropdownVisible) return null;
+
+    const options = [
+        { label: trueLabel, value: true },
+        { label: falseLabel, value: false }
+    ];
+
+    return (
+      <div className={styles.dropdownPanel}>
+        <ul className={styles.resultList}>
+          {options.map((option) => (
+            <li
+              key={option.label}
+              className={`${styles.resultItem} ${switchValue === option.value ? styles.selectedItem : ''}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                handleSwitchSelect(option.value);
+              }}
+            >
+              {option.label}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   // 渲染 ComboBox 下拉面板
   const renderComboBoxPanel = () => {
     if (Type !== "ComboBox" || !isDropdownVisible) return null;
 
     return (
-      <div className={styles.dropdownPanel} onClick={(e) => e.stopPropagation()}>
-        {/* 搜索输入框 - 仅当可编辑时显示 */}
+      <div className={styles.dropdownPanel}>
         {editable && (
           <input
             type="text"
@@ -399,7 +464,6 @@ const TextBox = ({
               const isChecked = selectedItems.includes(item);
               
               if (multiple) {
-                // 多选模式：显示复选框
                 return (
                   <li
                     key={index}
@@ -419,7 +483,6 @@ const TextBox = ({
                   </li>
                 );
               } else {
-                // 单选模式：直接点击选择
                 return (
                   <li
                     key={index}
@@ -559,7 +622,7 @@ const TextBox = ({
     };
 
     return (
-      <div className={styles.datePickerPanel} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.datePickerPanel}>
         {renderHeader()}
         <div className={styles.datePanelBody}>
           {renderContent()}
@@ -572,27 +635,35 @@ const TextBox = ({
     <div className={styles.container} ref={containerRef}>
       <label className={styles.label}>{label}</label>
 
-      <div className={styles.inputWrapper} onClick={handleDatePickerClick}>
+      <div className={styles.inputWrapper} ref={inputWrapperRef}>
         {/* 左边图标 */}
         <svg className={styles.icon} aria-hidden="true">
           <use xlinkHref={leftIcon}></use>
         </svg>
 
-        <input
-          ref={inputRef}
-          type="text"
-          className={`${styles.input} ${Type === "NumberInput" ? styles.numberInput : ''}`}
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={handleInputFocus}
-          onKeyDown={handleKeyDown}
-          placeholder={defaultPlaceholder}
-          inputMode={Type === "NumberInput" ? "numeric" : "text"}
-          readOnly={Type === "DatePicker" || (Type === "ComboBox" && !editable)}
-        />
+<input
+  ref={inputRef}
+  type="text"
+  className={`${styles.input} ${Type === "NumberInput" ? styles.numberInput : ''}`}
+  value={inputValue}
+  onChange={handleInputChange}
+  onFocus={handleInputFocus}
+  onKeyDown={handleKeyDown}
+  placeholder={defaultPlaceholder}
+  inputMode={Type === "NumberInput" ? "numeric" : "text"}
+  readOnly={Type === "DatePicker" || Type === "Switch" || (Type === "ComboBox" && !editable)}
+  // 添加这个，确保 DatePicker 点击时能触发
+  onClick={(e) => {
+    if (Type === "DatePicker") {
+      e.stopPropagation();
+      handleDatePickerClick();
+    }
+  }}
+/>
 
-        {/* SearchBox/ComboBox 模式：右边清空图标 */}
-        {(Type === "SearchBox" || Type === "ComboBox") && inputValue && (
+        {/* 清空图标逻辑 */}
+        {((Type === "SearchBox" || Type === "ComboBox") && inputValue) ||
+         (Type === "Switch" && inputValue) ? (
           <svg
             className={`${styles.icon} ${styles.rightIcon}`}
             aria-hidden="true"
@@ -600,10 +671,20 @@ const TextBox = ({
           >
             <use xlinkHref={rightIcon}></use>
           </svg>
-        )}
+        ) : null}
 
         {/* ComboBox 模式：下拉箭头图标 */}
         {Type === "ComboBox" && !inputValue && (
+          <svg
+            className={`${styles.icon} ${styles.rightIcon}`}
+            aria-hidden="true"
+          >
+            <use xlinkHref="#icon-arrow-down"></use>
+          </svg>
+        )}
+
+        {/* Switch 模式：下拉箭头图标 */}
+        {Type === "Switch" && !inputValue && (
           <svg
             className={`${styles.icon} ${styles.rightIcon}`}
             aria-hidden="true"
@@ -657,46 +738,49 @@ const TextBox = ({
             </button>
           </div>
         )}
+
+        {/* SearchBox 模式：下拉搜索界面 */}
+        {Type === "SearchBox" && isDropdownVisible && (
+          <div className={styles.dropdownPanel}>
+            <input
+              type="text"
+              className={styles.dropdownSearchInput}
+              placeholder="搜索选项..."
+              value={searchQuery}
+              onChange={handleSearchInputChange}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            />
+            <ul className={styles.resultList}>
+              {filteredData.length > 0 ? (
+                filteredData.map((item, index) => (
+                  <li
+                    key={index}
+                    className={styles.resultItem}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleSelectItem(item);
+                    }}
+                  >
+                    {item}
+                  </li>
+                ))
+              ) : (
+                <li className={styles.resultItem} style={{ color: '#999' }}>无匹配内容</li>
+              )}
+            </ul>
+          </div>
+        )}
+
+        {/* ComboBox 模式：下拉多选/单选界面 */}
+        {renderComboBoxPanel()}
+
+        {/* Switch 模式：下拉选择界面 */}
+        {renderSwitchPanel()}
+
+        {/* DatePicker 模式：日期选择面板 */}
+        {renderDatePickerPanel()}
       </div>
-
-      {/* SearchBox 模式：下拉搜索界面 */}
-      {Type === "SearchBox" && isDropdownVisible && (
-        <div className={styles.dropdownPanel}>
-          <input
-            type="text"
-            className={styles.dropdownSearchInput}
-            placeholder="搜索选项..."
-            value={searchQuery}
-            onChange={handleSearchInputChange}
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-          />
-          <ul className={styles.resultList}>
-            {filteredData.length > 0 ? (
-              filteredData.map((item, index) => (
-                <li
-                  key={index}
-                  className={styles.resultItem}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelectItem(item);
-                  }}
-                >
-                  {item}
-                </li>
-              ))
-            ) : (
-              <li className={styles.resultItem} style={{ color: '#999' }}>无匹配内容</li>
-            )}
-          </ul>
-        </div>
-      )}
-
-      {/* ComboBox 模式：下拉多选/单选界面 */}
-      {renderComboBoxPanel()}
-
-      {/* DatePicker 模式：日期选择面板 */}
-      {renderDatePickerPanel()}
     </div>
   );
 };

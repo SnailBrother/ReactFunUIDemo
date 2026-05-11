@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TextBox from '../../components/UI/TextBox';
 
 function MyTextBox() {
   const searchList = ['React', 'Vue', 'Angular', 'Svelte', 'Next.js', 'Node.js', 'JavaScript', 'TypeScript'];
+  const [isActive, setIsActive] = useState(true);
 
   return (
     <div>
@@ -51,9 +52,17 @@ function MyTextBox() {
         editable={true}
         multiple={true}
         connector="、"
-        onChange={(values) => console.log('选中：', values)}
+        onChange={(value) => console.log('选中：', value)}
       />
-
+      <TextBox
+        label="启用通知"
+        Type="Switch"
+        value={isActive}
+        onChange={(value) => setIsActive(value)}
+        leftIcon="#icon-unedit"
+        trueLabel="是"
+        falseLabel="否"
+      />
     </div>
   );
 }
